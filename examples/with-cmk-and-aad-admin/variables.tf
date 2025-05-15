@@ -26,6 +26,12 @@ variable "sql_administrator_login_password" {
   description = "The Password associated with the sql_administrator_login for the SQL administrator. If this is not provided customer_managed_key must be provided."
 }
 
+variable "synapse_key_name" {
+  description = "The ID of the customer-managed key"
+  type        = string
+  default     = "enckey"
+}
+
 variable "tags" {
   type        = map(any)
   default     = {}

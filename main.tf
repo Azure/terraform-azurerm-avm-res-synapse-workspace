@@ -5,11 +5,49 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
-# TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
-resource "azurerm_resource_group" "TODO" {
+resource "random_password" "synapse_sql_admin_password" {
+  length  = 16
+  special = true
+}
+
+# Synapse module resource
+resource "azurerm_synapse_workspace" "this" {
   location = coalesce(var.location, local.resource_group_location)
   name     = var.name # calling code must supply the name
+  resource_group_name = var.resource_group_name
+  storage_data_lake_gen2_filesystem_id = var.storage_data_lake_gen2_filesystem_id
+  sql_administrator_login = var.sql_administrator_login
+  sql_administrator_login_password = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password)
+  customer_managed_key {
+      key_name = var.cmk_enabled ? var.synapse_key_name : null
+      key_versionless_id = var.cmk_enabled ? var.key_versionless_id : null
+  }
+  identity {
+    type = var.managed_identities
+  }
+  tags = var.tags
 }
+
+resource "azurerm_synapse_workspace_key" "example" {
+  count = var.cmk_enabled ? 1 : 0
+
+  customer_managed_key_versionless_id = var.key_versionless_id
+  synapse_workspace_id                = azurerm_synapse_workspace.this.id
+  active                              = true
+  customer_managed_key_name           = var.synapse_key_name
+  depends_on                          = [azurerm_key_vault_access_policy.synapsepolicy]
+}
+
+resource "azurerm_synapse_workspace_aad_admin" "example" {
+  count = var.cmk_enabled ? 1 : 0
+
+  synapse_workspace_id = azurerm_synapse_workspace.this.id
+  login                = "AzureAD Admin"
+  object_id            = var.aad_admin_obj_id
+  tenant_id            = data.azurerm_client_config.current.tenant_id
+  depends_on = [azurerm_synapse_workspace.this]
+}
+
 
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {
