@@ -3,20 +3,10 @@ variable "name" {
   description = "The name of the this resource."
 
   validation {
-    condition     = can(regex("^[a-zA-Z0-9-]{3,24}$", var.name))
-    error_message = "The name must be between 3 and 24 characters long and can only contain letters, numbers and dashes."
-  }
-  validation {
-    error_message = "The name must not contain two consecutive dashes"
-    condition     = !can(regex("--", var.name))
-  }
-  validation {
-    error_message = "The name must start with a letter"
-    condition     = can(regex("^[a-zA-Z]", var.name))
-  }
-  validation {
-    error_message = "The name must end with a letter or number"
-    condition     = can(regex("[a-zA-Z0-9]$", var.name))
+    condition     = can(regex("TODO", var.name))
+    error_message = "The name must be TODO." # TODO remove the example below once complete:
+    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
+    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
   }
 }
 
