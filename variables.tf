@@ -17,45 +17,100 @@ variable "resource_group_name" {
 }
 
 variable "storage_data_lake_gen2_filesystem_id" {
-  type = string
+  type        = string
   description = "Specifies the ID of storage data lake gen2 filesystem resource. Changing this forces a new resource to be created."
 }
 
 variable "sql_administrator_login" {
-  type = string
-  default = "SQLAdmin"
+  type        = string
+  default     = "SQLAdmin"
   description = "Specifies The login name of the SQL administrator. Changing this forces a new resource to be created. If this is not provided customer_managed_key must be provided. "
 }
 
 variable "sql_administrator_login_password" {
-  type = string
-  sensitive = true
-  default = "null"
+  type        = string
+  sensitive   = true
+  default     = "null"
   description = "The Password associated with the sql_administrator_login for the SQL administrator. If this is not provided customer_managed_key must be provided."
 }
 
-variable "cmk_enabled" {
-  description = "Enable customer-managed key for Synapse workspace"
+variable "azuread_authentication_only" {
+  type        = bool
+  default     = false
+  description = "Is Azure Active Directory Authentication the only way to authenticate with resources inside this synapse Workspace."
+
+}
+
+variable "compute_subnet_id" {
+  type        = string
+  default     = null
+  description = "The ID of the subnet to use for the compute resources. Changing this forces a new resource to be created."
+}
+
+
+variable "azure_devops_repo" {
+  description = "Optional map for Azure DevOps repository configuration."
+  type = object({
+    account_name    = string
+    branch_name     = string
+    last_commit_id  = optional(string)
+    project_name    = string
+    repository_name = string
+    root_folder     = string
+    tenant_id       = optional(string)
+  })
+  default = null
+}
+
+variable "data_exfiltration_protection_enabled" {
+  description = "Is data exfiltration protection enabled in this workspace? If set to true, managed_virtual_network_enabled must also be set to true. Changing this forces a new resource to be created."
   type        = bool
   default     = false
 }
 
-variable "key_versionless_id" {
-  description = "The ID of the customer-managed key"
-  type        = string
-  default     = ""
+
+variable "github_repo" {
+description = "Optional block for GitHub repository configuration."
+type = object({
+  account_name    = string
+  branch_name     = string
+  repository_name = string
+  root_folder     = string
+  last_commit_id  = optional(string)
+  git_url         = optional(string)
+})
+default = null
 }
 
-variable "synapse_key_name" {
-  description = "The ID of the customer-managed key"
-  type        = string
-  default     = ""
+
+variable "cmk_enabled" {
+  description = "Flag to enable the customer_managed_key block."
+  type        = bool
+  default     = false
 }
+
+variable "cmk_key_versionless_id" {
+  description = "The Azure Key Vault Key Versionless ID to be used as the Customer Managed Key (CMK) for double encryption."
+  type        = string
+}
+
+variable "cmk_key_name" {
+  description = "An identifier for the key. Defaults to 'cmk' if not specified."
+  type        = string
+  default     = null
+}
+
+variable "cmk_user_assigned_identity_id" {
+  description = "The User Assigned Identity ID to be used for accessing the Customer Managed Key for encryption."
+  type        = string
+  default     = null
+}
+
 
 variable "key_vault_id" {
   description = "The ID of the Key Vault"
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "use_access_policy" {
@@ -65,23 +120,46 @@ variable "use_access_policy" {
 }
 
 variable "aad_admin_obj_id" {
-  type = string
-  default = ""
+  type        = string
+  default     = ""
   description = "The Object ID of AAD group to be added as an admin"
 }
 
-# required AVM interfaces
-# remove only if not supported by the resource
-# tflint-ignore: terraform_unused_declarations
-variable "customer_managed_key" {
-  type = object({
-    key_vault_resource_id              = optional(string)
-    key_name                           = optional(string)
-    key_version                        = optional(string, null)
-    user_assigned_identity_resource_id = optional(string, null)
-  })
-  default     = {}
-  description = "Customer managed keys that should be associated with the resource."
+
+
+variable "linking_allowed_for_aad_tenant_ids" {
+  type        = list(string)
+  default     = []
+  description = "A set of AAD tenant IDs that are allowed to link to this workspace. If not specified, all tenants are allowed."
+}
+
+variable "managed_resource_group_name" {
+  type        = string
+  default     = null
+  description = "Workspace managed resource group. Changing this forces a new resource to be created."
+}
+
+variable "managed_virtual_network_enabled" {
+  type        = bool
+  default     = false
+  description = "Is Virtual Network enabled for all computes in this workspace? Changing this forces a new resource to be created."
+}
+variable "public_network_access_enabled" {
+  type        = bool
+  default     = true
+  description = "Whether public network access is enabled for the workspace. Defaults to true."
+}
+
+variable "purview_id" {
+  type        = string
+  default     = null
+  description = "The ID of the Purview account to link to the Synapse workspace. If not specified, no link will be created."
+}
+
+variable "sql_identity_control_enabled" { 
+  type = bool
+  default = false
+  description = "Are pipelines (running as workspace's system assigned identity) allowed to access SQL pools?"
 }
 
 variable "diagnostic_settings" {
@@ -161,15 +239,17 @@ variable "lock" {
   }
 }
 
-# tflint-ignore: terraform_unused_declarations
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  description = "Managed identities to be created for the resource."
+variable "identity_type" {
+  description = "Specifies the type of Managed Service Identity that should be associated with this Synapse Workspace. Possible values: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned."
+  type        = string
 }
+
+variable "identity_ids" {
+  description = "Specifies a list of User Assigned Managed Identity IDs to be assigned to this Synapse Workspace. This is required when type is set to UserAssigned or SystemAssigned, UserAssigned."
+  type        = list(string)
+  default     = null
+}
+
 
 variable "private_endpoints" {
   type = map(object({
