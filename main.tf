@@ -39,43 +39,43 @@ resource "azurerm_synapse_workspace" "this" {
   data_exfiltration_protection_enabled = var.data_exfiltration_protection_enabled
 
 
-dynamic "github_repo" {
-  for_each = var.github_repo != null ? [var.github_repo] : []
-  content {
-    account_name     = github_repo.value.account_name
-    branch_name      = github_repo.value.branch_name
-    repository_name  = github_repo.value.repository_name
-    root_folder      = github_repo.value.root_folder
+  dynamic "github_repo" {
+    for_each = var.github_repo != null ? [var.github_repo] : []
+    content {
+      account_name    = github_repo.value.account_name
+      branch_name     = github_repo.value.branch_name
+      repository_name = github_repo.value.repository_name
+      root_folder     = github_repo.value.root_folder
 
-    # Optional fields
-    last_commit_id   = try(github_repo.value.last_commit_id, null)
-    git_url          = try(github_repo.value.git_url, null)
+      # Optional fields
+      last_commit_id = try(github_repo.value.last_commit_id, null)
+      git_url        = try(github_repo.value.git_url, null)
+    }
   }
-}
 
-dynamic "customer_managed_key" {
-  for_each = var.cmk_enabled ? [1] : []
-  content {
-    key_versionless_id        = var.cmk_key_versionless_id
-    key_name                  = try(var.cmk_key_name, null)
-    user_assigned_identity_id = try(var.cmk_user_assigned_identity_id, null)
+  dynamic "customer_managed_key" {
+    for_each = var.cmk_enabled ? [1] : []
+    content {
+      key_versionless_id        = var.cmk_key_versionless_id
+      key_name                  = try(var.cmk_key_name, null)
+      user_assigned_identity_id = try(var.cmk_user_assigned_identity_id, null)
+    }
   }
-}
 
   linking_allowed_for_aad_tenant_ids = var.linking_allowed_for_aad_tenant_ids
-  managed_resource_group_name = var.managed_resource_group_name
-  managed_virtual_network_enabled = var.managed_virtual_network_enabled
-  public_network_access_enabled       = var.public_network_access_enabled
-  purview_id = var.purview_id
-  sql_identity_control_enabled = var.sql_identity_control_enabled
+  managed_resource_group_name        = var.managed_resource_group_name
+  managed_virtual_network_enabled    = var.managed_virtual_network_enabled
+  public_network_access_enabled      = var.public_network_access_enabled
+  purview_id                         = var.purview_id
+  sql_identity_control_enabled       = var.sql_identity_control_enabled
 
-dynamic "identity" {
-  for_each = var.identity_type != null ? [1] : []
-  content {
-    type         = var.identity_type
-    identity_ids = try(var.identity_ids, null)
+  dynamic "identity" {
+    for_each = var.identity_type != null ? [1] : []
+    content {
+      type         = var.identity_type
+      identity_ids = try(var.identity_ids, null)
+    }
   }
-}
 
   tags = var.tags
 }

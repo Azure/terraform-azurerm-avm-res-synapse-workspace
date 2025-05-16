@@ -70,16 +70,16 @@ variable "data_exfiltration_protection_enabled" {
 
 
 variable "github_repo" {
-description = "Optional block for GitHub repository configuration."
-type = object({
-  account_name    = string
-  branch_name     = string
-  repository_name = string
-  root_folder     = string
-  last_commit_id  = optional(string)
-  git_url         = optional(string)
-})
-default = null
+  description = "Optional block for GitHub repository configuration."
+  type = object({
+    account_name    = string
+    branch_name     = string
+    repository_name = string
+    root_folder     = string
+    last_commit_id  = optional(string)
+    git_url         = optional(string)
+  })
+  default = null
 }
 
 
@@ -156,9 +156,9 @@ variable "purview_id" {
   description = "The ID of the Purview account to link to the Synapse workspace. If not specified, no link will be created."
 }
 
-variable "sql_identity_control_enabled" { 
-  type = bool
-  default = false
+variable "sql_identity_control_enabled" {
+  type        = bool
+  default     = false
   description = "Are pipelines (running as workspace's system assigned identity) allowed to access SQL pools?"
 }
 
