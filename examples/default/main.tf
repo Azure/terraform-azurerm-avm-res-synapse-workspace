@@ -58,7 +58,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
+    "${var.sql_administrator_login}" = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
   }
   role_assignments = {
     deployment_user_kv_admin = {
@@ -102,7 +102,7 @@ module "azure_data_lake_storage" {
 
   role_assignments = {
     role_assignment_1 = {
-      role_definition_id_or_name       = "Owner"
+      role_definition_id_or_name       = "Storage Blob Data Contributor"
       principal_id                     = data.azurerm_client_config.current.object_id
       skip_service_principal_aad_check = false
     }
@@ -124,7 +124,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
 module "synapse" {
   source = "../.."
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
-  name                                 = "synapse-${random_integer.region_index.result}"
+  name                                 = "synapse-test-workspace-avm"
   location                             = azurerm_resource_group.this.location
   tags                                 = var.tags
   cmk_enabled                          = var.cmk_enabled
