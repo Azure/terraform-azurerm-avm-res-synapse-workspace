@@ -10,6 +10,8 @@ resource "random_password" "synapse_sql_admin_password" {
   special = true
 }
 
+data "azurerm_client_config" "current" {}
+
 # Synapse module resource
 resource "azurerm_synapse_workspace" "this" {
   location                             = coalesce(var.location, local.resource_group_location)

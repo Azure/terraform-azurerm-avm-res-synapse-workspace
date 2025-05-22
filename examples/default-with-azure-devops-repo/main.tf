@@ -51,7 +51,7 @@ data "azurerm_client_config" "current" {}
 # Creating Key vault to store sql admin secrets
 
 module "key_vault" {
-  source             = "Azure/avm-res-keyvault-vault/azurerm"
+  source                        = "Azure/avm-res-keyvault-vault/azurerm"
   name                          = module.naming.key_vault.name_unique
   location                      = azurerm_resource_group.this.location
   enable_telemetry              = var.enable_telemetry
