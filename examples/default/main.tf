@@ -100,6 +100,10 @@ module "azure_data_lake_storage" {
   shared_access_key_enabled     = true
   tags                          = var.tags
 
+  storage_data_lake_gen2_filesystem = {
+    name = "synapseadlsfs"
+  }
+
   role_assignments = {
     role_assignment_1 = {
       role_definition_id_or_name       = "Storage Blob Data Contributor"
@@ -111,11 +115,11 @@ module "azure_data_lake_storage" {
   depends_on = [azurerm_resource_group.this]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
-  name               = "synapseadlsfs"
-  storage_account_id = module.azure_data_lake_storage.resource_id
-  depends_on = [ module.azure_data_lake_storage ]
-}
+# resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
+#   name               = "synapseadlsfs"
+#   storage_account_id = module.azure_data_lake_storage.resource_id
+#   depends_on = [ module.azure_data_lake_storage ]
+# }
 
 # This is the module call for Synapse Workspace
 # This is the module call
@@ -134,9 +138,12 @@ module "synapse" {
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   resource_group_name                  = azurerm_resource_group.this.name
-  storage_data_lake_gen2_filesystem_id = resource.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  storage_data_lake_gen2_filesystem_id = module.azure_data_lake_storage.containers["synapseadlsfs"].id
+  # storage_data_lake_gen2_filesystem_id = resource.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
   depends_on = [ 
     module.key_vault,
-    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+    module.azure_data_lake_storage,
+    data.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+    # azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
    ]
 }
