@@ -58,7 +58,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password)
+    test_secret = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
   }
   role_assignments = {
     deployment_user_kv_admin = {
