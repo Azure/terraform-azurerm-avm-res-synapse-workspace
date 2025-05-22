@@ -82,6 +82,12 @@ data "azurerm_key_vault_secret" "test_secret" {
   depends_on   = [module.key_vault]
 }
 
+data "azurerm_key_vault_secret" "sql_admin" {
+  name         = var.sql_administrator_login
+  key_vault_id = module.key_vault.resource_id
+  depends_on   = [module.key_vault]
+}
+
 # Creating ADLS and file system for Synapse 
 
 module "azure_data_lake_storage" {
