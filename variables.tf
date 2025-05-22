@@ -92,6 +92,7 @@ variable "cmk_enabled" {
 variable "cmk_key_versionless_id" {
   description = "The Azure Key Vault Key Versionless ID to be used as the Customer Managed Key (CMK) for double encryption."
   type        = string
+  default     = null
 }
 
 variable "cmk_key_name" {
@@ -241,6 +242,7 @@ variable "lock" {
 variable "identity_type" {
   description = "Specifies the type of Managed Service Identity that should be associated with this Synapse Workspace. Possible values: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned."
   type        = string
+  default     = "SystemAssigned"
 }
 
 variable "identity_ids" {
