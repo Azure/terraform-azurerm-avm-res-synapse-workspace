@@ -142,8 +142,6 @@ module "synapse" {
   # storage_data_lake_gen2_filesystem_id = resource.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
   depends_on = [ 
     module.key_vault,
-    module.azure_data_lake_storage,
-    data.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
-    # azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+    module.azure_data_lake_storage
    ]
 }
