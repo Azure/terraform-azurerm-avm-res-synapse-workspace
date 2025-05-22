@@ -17,7 +17,7 @@ resource "azurerm_synapse_workspace" "this" {
   resource_group_name                  = var.resource_group_name
   storage_data_lake_gen2_filesystem_id = var.storage_data_lake_gen2_filesystem_id
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password)
+  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
   azuread_authentication_only          = var.azuread_authentication_only
   compute_subnet_id                    = var.compute_subnet_id
 
