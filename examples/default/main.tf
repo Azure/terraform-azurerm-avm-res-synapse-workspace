@@ -114,6 +114,7 @@ module "azure_data_lake_storage" {
 resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
   name               = "synapseadlsfs"
   storage_account_id = module.azure_data_lake_storage.resource_id
+  depends_on = [ module.azure_data_lake_storage ]
 }
 
 # This is the module call for Synapse Workspace
@@ -134,4 +135,8 @@ module "synapse" {
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   resource_group_name                  = azurerm_resource_group.this.name
   storage_data_lake_gen2_filesystem_id = resource.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  depends_on = [ 
+    module.key_vault,
+    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+   ]
 }
