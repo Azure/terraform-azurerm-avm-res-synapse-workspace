@@ -76,12 +76,6 @@ module "key_vault" {
   depends_on = [azurerm_resource_group.this]
 }
 
-data "azurerm_key_vault_secret" "test_secret" {
-  name         = "test-secret"
-  key_vault_id = module.key_vault.resource_id
-  depends_on   = [module.key_vault]
-}
-
 data "azurerm_key_vault_secret" "sql_admin" {
   name         = var.sql_administrator_login
   key_vault_id = module.key_vault.resource_id
@@ -136,7 +130,7 @@ module "synapse" {
   cmk_enabled                          = var.cmk_enabled
   identity_type                        = "SystemAssigned"
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = data.azurerm_key_vault_secret.test_secret.value
+  sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   resource_group_name                  = azurerm_resource_group.this.name
   storage_data_lake_gen2_filesystem_id = resource.azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id

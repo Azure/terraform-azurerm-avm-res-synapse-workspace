@@ -51,7 +51,7 @@ data "azurerm_client_config" "current" {}
 # Creating Key vault to store Customer-managed Key (CMK)
 
 module "key_vault" {
-  source             = "Azure/avm-res-keyvault-vault/azurerm"
+  source                        = "Azure/avm-res-keyvault-vault/azurerm"
   name                          = module.naming.key_vault.name_unique
   location                      = azurerm_resource_group.this.location
   enable_telemetry              = var.enable_telemetry
@@ -89,14 +89,14 @@ module "key_vault" {
     bypass   = "AzureServices"
     ip_rules = ["${data.http.ip.response_body}/32"]
   }
-  depends_on = [ azurerm_resource_group.this ]
+  depends_on = [azurerm_resource_group.this]
 }
 
 # Creating ADLS and file system for Synapse 
 
-module "azure_data_lake_storage"{
-  source = "Azure/avm-res-storage-storageaccount/azurerm"
-  version = "0.2.7"
+module "azure_data_lake_storage" {
+  source                        = "Azure/avm-res-storage-storageaccount/azurerm"
+  version                       = "0.2.7"
   account_replication_type      = "LRS"
   account_tier                  = "Standard"
   account_kind                  = "StorageV2"
@@ -108,7 +108,7 @@ module "azure_data_lake_storage"{
   shared_access_key_enabled     = true
   is_hns_enabled                = true
   public_network_access_enabled = true
-  tags = var.tags
+  tags                          = var.tags
   role_assignments = {
     role_assignment_1 = {
       role_definition_id_or_name       = "Owner"
@@ -119,7 +119,7 @@ module "azure_data_lake_storage"{
   storage_data_lake_gen2_filesystem = {
     name = var.storage_data_lake_gen2_filesystem_name
   }
-  depends_on = [ azurerm_resource_group.this ]
+  depends_on = [azurerm_resource_group.this]
 }
 
 data "azurerm_storage_data_lake_gen2_filesystem" "storage_data_lake_gen2_filesystem_id" {
@@ -132,20 +132,20 @@ data "azurerm_storage_data_lake_gen2_filesystem" "storage_data_lake_gen2_filesys
 module "azurerm_synapse_workspace" {
   source = "../.."
   # source             = "Azure/avm-res-synapse-workspace"
-  resource_group_name = azurerm_resource_group.this.name
-  location = azurerm_resource_group.this.location
-  name = "synapse-workspace"
+  resource_group_name                  = azurerm_resource_group.this.name
+  location                             = azurerm_resource_group.this.location
+  name                                 = "synapse-workspace"
   storage_data_lake_gen2_filesystem_id = data.azurerm_storage_data_lake_gen2_filesystem.storage_data_lake_gen2_filesystem_id
-  cmk_enabled = true
-  synapse_key_name = var.synapse_key_name
-  key_versionless_id = module.key_vault.keys_resource_ids["workspaceencryptionkey"].versionless_id
-  key_vault_id = module.key_vault.resource_id
-  aad_admin_obj_id = ""
+  cmk_enabled                          = true
+  synapse_key_name                     = var.synapse_key_name
+  key_versionless_id                   = module.key_vault.keys_resource_ids["workspaceencryptionkey"].versionless_id
+  key_vault_id                         = module.key_vault.resource_id
+  aad_admin_obj_id                     = ""
   managed_identities = {
     system_assigned = true
   }
-  depends_on = [ 
+  depends_on = [
     module.key_vault,
     moduule.azure_data_lake_storage
-   ]
+  ]
 }
