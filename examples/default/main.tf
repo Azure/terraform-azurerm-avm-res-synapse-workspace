@@ -78,7 +78,7 @@ module "key_vault" {
 
 data "azurerm_key_vault_secret" "test_secret" {
   name         = "test-secret"
-  key_vault_id = module.key_vault.secrets_resource_ids["test_secret"]
+  key_vault_id = module.key_vault.secrets_resource_ids
   depends_on   = [module.key_vault]
 }
 
