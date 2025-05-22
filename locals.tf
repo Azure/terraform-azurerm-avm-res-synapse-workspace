@@ -2,7 +2,6 @@
 locals {
   resource_group_location = coalesce(
     var.location,
-    try(data.azurerm_resource_group.parent[0].location, null),
     try(data.azurerm_resource_group.parent.location, null)
   )
 
