@@ -20,13 +20,6 @@ variable "sql_administrator_login" {
   description = "Specifies The login name of the SQL administrator. Changing this forces a new resource to be created. If this is not provided customer_managed_key must be provided. "
 }
 
-variable "sql_administrator_login_password" {
-  type        = string
-  sensitive   = true
-  default     = "null"
-  description = "The Password associated with the sql_administrator_login for the SQL administrator. If this is not provided customer_managed_key must be provided."
-}
-
 variable "tags" {
   type        = map(any)
   default     = {}
