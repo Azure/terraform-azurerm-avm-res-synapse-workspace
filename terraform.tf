@@ -10,10 +10,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 4.28.0, < 5.0.0"
     }
-    http = {
-      source  = "hashicorp/http"
-      version = ">= 3.5.0"
-    }
+    # http = {
+    #   source  = "hashicorp/http"
+    #   version = ">= 3.5.0"
+    # }
     # local = {
     #   source  = "hashicorp/local"
     #   version = ">= 2.4.0"
