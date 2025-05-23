@@ -1,25 +1,23 @@
 terraform {
-  required_version = ">= 1.7.0"
+  required_version = ">= 1.5.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.71, < 5.0.0"
+      version = ">= 4.28.0, < 5.0.0" # Latest version published a day ago [1](https://registry.terraform.io/providers/hashicorp/azurerm/latest)
     }
-    http = {
-      source  = "hashicorp/http"
-      version = "~> 3.4"
+    modtm = {
+      source  = "Azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 5.0.0"
+      version = ">= 3.6.0, < 4.0" # Latest stable version
     }
   }
 }
 
 provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
+  features {}
+  
 }

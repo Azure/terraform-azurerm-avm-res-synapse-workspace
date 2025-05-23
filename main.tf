@@ -16,14 +16,22 @@ resource "azurerm_synapse_workspace" "this" {
   name                                 = var.name # calling code must supply the name
   resource_group_name                  = var.resource_group_name
   storage_data_lake_gen2_filesystem_id = var.storage_data_lake_gen2_filesystem_id
-  sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
   azuread_authentication_only          = var.azuread_authentication_only
   compute_subnet_id                    = var.compute_subnet_id
-
+  data_exfiltration_protection_enabled = var.data_exfiltration_protection_enabled
+  linking_allowed_for_aad_tenant_ids   = var.linking_allowed_for_aad_tenant_ids
+  managed_resource_group_name          = var.managed_resource_group_name
+  managed_virtual_network_enabled      = var.managed_virtual_network_enabled
+  public_network_access_enabled        = var.public_network_access_enabled
+  purview_id                           = var.purview_id
+  sql_administrator_login              = var.sql_administrator_login
+  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
+  sql_identity_control_enabled         = var.sql_identity_control_enabled
+  tags                                 = var.tags
 
   dynamic "azure_devops_repo" {
     for_each = var.azure_devops_repo != null ? [var.azure_devops_repo] : []
+
     content {
       account_name    = azure_devops_repo.value.account_name
       branch_name     = azure_devops_repo.value.branch_name
@@ -35,69 +43,58 @@ resource "azurerm_synapse_workspace" "this" {
       tenant_id      = try(azure_devops_repo.value.tenant_id, null)
     }
   }
-
-  data_exfiltration_protection_enabled = var.data_exfiltration_protection_enabled
-
-
-  dynamic "github_repo" {
-    for_each = var.github_repo != null ? [var.github_repo] : []
-    content {
-      account_name    = github_repo.value.account_name
-      branch_name     = github_repo.value.branch_name
-      repository_name = github_repo.value.repository_name
-      root_folder     = github_repo.value.root_folder
-
-      # Optional fields
-      last_commit_id = try(github_repo.value.last_commit_id, null)
-      git_url        = try(github_repo.value.git_url, null)
-    }
-  }
-
   dynamic "customer_managed_key" {
     for_each = var.cmk_enabled ? [1] : []
+
     content {
       key_versionless_id        = var.cmk_key_versionless_id
       key_name                  = try(var.cmk_key_name, null)
       user_assigned_identity_id = try(var.cmk_user_assigned_identity_id, null)
     }
   }
+  dynamic "github_repo" {
+    for_each = var.github_repo != null ? [var.github_repo] : []
 
-  linking_allowed_for_aad_tenant_ids = var.linking_allowed_for_aad_tenant_ids
-  managed_resource_group_name        = var.managed_resource_group_name
-  managed_virtual_network_enabled    = var.managed_virtual_network_enabled
-  public_network_access_enabled      = var.public_network_access_enabled
-  purview_id                         = var.purview_id
-  sql_identity_control_enabled       = var.sql_identity_control_enabled
-
+    content {
+      account_name    = github_repo.value.account_name
+      branch_name     = github_repo.value.branch_name
+      repository_name = github_repo.value.repository_name
+      root_folder     = github_repo.value.root_folder
+      git_url         = try(github_repo.value.git_url, null)
+      # Optional fields
+      last_commit_id = try(github_repo.value.last_commit_id, null)
+    }
+  }
   dynamic "identity" {
     for_each = var.identity_type != null ? [1] : []
+
     content {
       type         = var.identity_type
       identity_ids = try(var.identity_ids, null)
     }
   }
-
-  tags = var.tags
 }
 
 resource "azurerm_synapse_workspace_key" "example" {
   count = var.cmk_enabled ? 1 : 0
 
-  customer_managed_key_versionless_id = var.cmk_key_versionless_id
-  synapse_workspace_id                = azurerm_synapse_workspace.this.id
   active                              = true
   customer_managed_key_name           = var.cmk_key_name
-  depends_on                          = [azurerm_key_vault_access_policy.synapsepolicy]
+  synapse_workspace_id                = azurerm_synapse_workspace.this.id
+  customer_managed_key_versionless_id = var.cmk_key_versionless_id
+
+  depends_on = [azurerm_key_vault_access_policy.synapsepolicy]
 }
 
 resource "azurerm_synapse_workspace_aad_admin" "example" {
   count = var.cmk_enabled ? 1 : 0
 
-  synapse_workspace_id = azurerm_synapse_workspace.this.id
   login                = "AzureAD Admin"
   object_id            = var.aad_admin_obj_id
+  synapse_workspace_id = azurerm_synapse_workspace.this.id
   tenant_id            = data.azurerm_client_config.current.tenant_id
-  depends_on           = [azurerm_synapse_workspace.this]
+
+  depends_on = [azurerm_synapse_workspace.this]
 }
 
 

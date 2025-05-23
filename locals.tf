@@ -1,12 +1,5 @@
 # TODO: insert locals here.
 locals {
-  resource_group_location = coalesce(
-    var.location,
-    try(data.azurerm_resource_group.parent.location, null)
-  )
-
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-
   private_endpoint_application_security_group_associations = {
     for assoc in flatten([
       for pe_k, pe_v in var.private_endpoints : [
@@ -18,4 +11,9 @@ locals {
       ]
     ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc
   }
+  resource_group_location = coalesce(
+    var.location,
+    try(data.azurerm_resource_group.parent.location, null)
+  )
+  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
 }
