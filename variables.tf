@@ -295,7 +295,6 @@ variable "sql_administrator_login" {
 
 variable "sql_administrator_login_password" {
   type        = string
-  default     = "null"
   description = "The Password associated with the sql_administrator_login for the SQL administrator. If this is not provided customer_managed_key must be provided."
   sensitive   = true
 }
