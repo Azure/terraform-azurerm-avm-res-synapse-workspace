@@ -175,6 +175,7 @@ module "synapse" {
   lock = {
     name       = "synapse-lock"
     lock_level = "None"
+    kind       = "None"
   }
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
   name                                 = "synapse-test-workspace-avm"
