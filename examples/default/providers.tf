@@ -33,7 +33,5 @@ terraform {
 }
 
 provider "azurerm" {
-  features {
-    resource_group {}
-  }
+  features {}
 }
