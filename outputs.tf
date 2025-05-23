@@ -11,7 +11,7 @@ output "synapse_workspace" {
 }
 
 output "resource_id" {
-  value = azurerm_synapse_workspace.this.id
+  value       = azurerm_synapse_workspace.this.id
   description = "The resource ID of the Synapse Workspace."
 }
 
