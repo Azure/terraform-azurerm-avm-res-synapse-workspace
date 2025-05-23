@@ -122,3 +122,15 @@ resource "azurerm_role_assignment" "this" {
   role_definition_name                   = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_resource_substring)) ? null : each.value.role_definition_id_or_name
   skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
 }
+
+# resource "azurerm_role_assignment" "synapse_blob_contributor" {
+#   principal_id         = azurerm_synapse_workspace.this.identity[0].principal_id
+#   scope                = azurerm_storage_account.adls.id
+#   role_definition_name = "Storage Blob Data Contributor"
+
+#   depends_on = [
+#     azurerm_synapse_workspace.this,
+#     azurerm_storage_account.adls
+#   ]
+# }
+
