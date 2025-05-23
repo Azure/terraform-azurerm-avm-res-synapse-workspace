@@ -176,16 +176,12 @@ variable "location" {
 
 variable "lock" {
   type = object({
+    kind = string
     name = optional(string, null)
-    kind = optional(string, "None")
   })
-  default     = {}
-  description = "The lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`."
-  nullable    = false
-
-  validation {
-    condition     = contains(["CanNotDelete", "ReadOnly", "None"], var.lock.kind)
-    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
+  default = {
+    kind = "None"
+    name = null
   }
 }
 
