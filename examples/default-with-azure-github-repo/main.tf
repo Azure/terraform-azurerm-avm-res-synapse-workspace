@@ -1,8 +1,8 @@
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = ">= 0.8.0"
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "0.5.2"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -12,22 +12,17 @@ resource "random_integer" "region_index" {
 }
 ## End of section to provide a random Azure region for the resource group
 
-# This allow use to randomize the name of resources
-resource "random_string" "this" {
-  length  = 6
-  special = false
-  upper   = false
-}
-
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = ">= 0.4.1"
+  version = ">= 0.3.0"
+
+  unique-length = 7
 }
 
 # This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
+  location = "East US 2"
   name     = module.naming.resource_group.name_unique
 }
 
@@ -51,7 +46,8 @@ data "azurerm_client_config" "current" {}
 # Creating Key vault to store sql admin secrets
 
 module "key_vault" {
-  source = "Azure/avm-res-keyvault-vault/azurerm"
+  source  = "Azure/avm-res-keyvault-vault/azurerm"
+  version = "0.10.0"
 
   location            = azurerm_resource_group.this.location
   name                = module.naming.key_vault.name_unique
@@ -75,8 +71,9 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password)
+    test_secret = random_password.synapse_sql_admin_password.result
   }
+  sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
     create = "60s"
   }
@@ -84,56 +81,104 @@ module "key_vault" {
   depends_on = [azurerm_resource_group.this]
 }
 
+data "azurerm_key_vault_secret" "sql_admin" {
+  key_vault_id = module.key_vault.resource_id
+  name         = var.sql_administrator_login
+
+  depends_on = [module.key_vault]
+}
+
 # Creating ADLS and file system for Synapse 
 
-module "azure_data_lake_storage" {
-  source  = "Azure/avm-res-storage-storageaccount/azurerm"
-  version = "0.2.7"
+# module "azure_data_lake_storage" {
+#   source                        = "Azure/avm-res-storage-storageaccount/azurerm"
+#   version                       = "0.6.2"
+#   location                      = azurerm_resource_group.this.location
+#   name                          = module.naming.storage_account.name_unique
+#   resource_group_name           = azurerm_resource_group.this.name
+#   account_kind                  = "StorageV2"
+#   account_replication_type      = "LRS"
+#   account_tier                  = "Standard"
+#   https_traffic_only_enabled    = true
+#   is_hns_enabled                = true
+#   min_tls_version               = "TLS1_2"
+#   public_network_access_enabled = true
+#   shared_access_key_enabled     = true
+#   tags                          = var.tags
 
+#   storage_data_lake_gen2_filesystem = {
+#     synapseadlsfs = {
+#       filesystem = {
+#         name = "synapseadlsfs"
+#       }
+#     }
+#   }
+
+#   role_assignments = {
+#     role_assignment_1 = {
+#       role_definition_id_or_name       = "Storage Blob Data Contributor"
+#       principal_id                     = data.azurerm_client_config.current.object_id
+#       skip_service_principal_aad_check = false
+#     }
+#   }
+
+#   depends_on = [azurerm_resource_group.this]
+# }
+
+resource "azurerm_storage_account" "adls" {
+  account_replication_type      = "LRS"
+  account_tier                  = "Standard"
   location                      = azurerm_resource_group.this.location
   name                          = module.naming.storage_account.name_unique
   resource_group_name           = azurerm_resource_group.this.name
   account_kind                  = "StorageV2"
-  account_replication_type      = "LRS"
-  account_tier                  = "Standard"
   https_traffic_only_enabled    = true
   is_hns_enabled                = true
   min_tls_version               = "TLS1_2"
   public_network_access_enabled = true
-  role_assignments = {
-    role_assignment_1 = {
-      role_definition_id_or_name       = "Owner"
-      principal_id                     = data.azurerm_client_config.current.object_id
-      skip_service_principal_aad_check = false
-    },
-  }
-  shared_access_key_enabled = true
-  storage_data_lake_gen2_filesystem = {
-    name = var.storage_data_lake_gen2_filesystem_name
-  }
-  tags = var.tags
+  shared_access_key_enabled     = true
+  tags                          = var.tags
 
   depends_on = [azurerm_resource_group.this]
 }
 
-data "azurerm_storage_data_lake_gen2_filesystem" "storage_data_lake_gen2_filesystem_id" {
-  name               = var.storage_data_lake_gen2_filesystem_name
-  storage_account_id = module.azure_data_lake_storage.id
+resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
+  name               = "synapseadlsfs"
+  storage_account_id = azurerm_storage_account.adls.id
+
+  depends_on = [azurerm_storage_account.adls]
+}
+
+resource "azurerm_role_assignment" "adls_blob_contributor" {
+  principal_id         = data.azurerm_client_config.current.object_id
+  scope                = azurerm_storage_account.adls.id
+  role_definition_name = "Storage Blob Data Contributor"
+
+  depends_on = [azurerm_storage_account.adls]
 }
 
 # This is the module call for Synapse Workspace
-
-module "azurerm_synapse_workspace" {
+# This is the module call
+# Do not specify location here due to the randomization above.
+# Leaving location as `null` will cause the module to use the resource group location
+# with a data source.
+module "synapse" {
   source = "../.."
 
-  name = "synapse-workspace"
-  # source             = "Azure/avm-res-synapse-workspace"
+  # source             = "Azure/avm-res-synapse-workspace/azurerm"
+  name                                 = "synapse-test-workspace-avm"
   resource_group_name                  = azurerm_resource_group.this.name
-  storage_data_lake_gen2_filesystem_id = data.azurerm_storage_data_lake_gen2_filesystem.storage_data_lake_gen2_filesystem_id
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  cmk_enabled                          = var.cmk_enabled
+  enable_telemetry                     = var.enable_telemetry # see variables.tf
+  identity_type                        = "SystemAssigned"
   location                             = azurerm_resource_group.this.location
+  sql_administrator_login              = var.sql_administrator_login
+  sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
+  tags                                 = var.tags
 
   depends_on = [
     module.key_vault,
-    moduule.azure_data_lake_storage
+    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
   ]
 }

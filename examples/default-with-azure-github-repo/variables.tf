@@ -1,6 +1,13 @@
-variable "storage_data_lake_gen2_filesystem_name" {
-  type        = string
-  description = "Specifies the name of storage data lake gen2 filesystem resource."
+# variable "storage_data_lake_gen2_filesystem_name" {
+#   type        = string
+#   description = "Specifies the name of storage data lake gen2 filesystem resource."
+#   default     = "synapseadls_fs"
+# }
+
+variable "cmk_enabled" {
+  type        = bool
+  default     = false
+  description = "Flag to enable the customer_managed_key block."
 }
 
 variable "enable_telemetry" {
@@ -17,13 +24,6 @@ variable "sql_administrator_login" {
   type        = string
   default     = "SQLAdmin"
   description = "Specifies The login name of the SQL administrator. Changing this forces a new resource to be created. If this is not provided customer_managed_key must be provided. "
-}
-
-variable "sql_administrator_login_password" {
-  type        = string
-  default     = "null"
-  description = "The Password associated with the sql_administrator_login for the SQL administrator. If this is not provided customer_managed_key must be provided."
-  sensitive   = true
 }
 
 variable "tags" {
