@@ -170,7 +170,7 @@ variable "linking_allowed_for_aad_tenant_ids" {
 
 variable "location" {
   type        = string
-  nullable = false
+  nullable    = false
   description = "Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location."
 }
 
