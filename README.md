@@ -27,29 +27,11 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.5.0)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (>= 1.12.0)
-
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.28.0, < 5.0.0)
-
-- <a name="requirement_http"></a> [http](#requirement\_http) (>= 3.5.0)
-
-- <a name="requirement_local"></a> [local](#requirement\_local) (>= 2.4.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (>= 0.1.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0)
-
-- <a name="requirement_time"></a> [time](#requirement\_time) (>= 0.9.0)
-
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 4.28.0, < 5.0.0)
-
-- <a name="provider_modtm"></a> [modtm](#provider\_modtm) (>= 0.1.0)
-
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0)
 
 ## Resources
 
@@ -75,6 +57,25 @@ The following resources are used by this module:
 
 The following input variables are required:
 
+### <a name="input_location"></a> [location](#input\_location)
+
+Description: Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location.
+
+Type: `string`
+
+### <a name="input_lock"></a> [lock](#input\_lock)
+
+Description: values are `None`, `CanNotDelete`, and `ReadOnly`.
+
+Type:
+
+```hcl
+object({
+    kind = string
+    name = optional(string, null)
+  })
+```
+
 ### <a name="input_name"></a> [name](#input\_name)
 
 Description: The name of the this resource.
@@ -87,11 +88,23 @@ Description: The resource group where the resources will be deployed.
 
 Type: `string`
 
+### <a name="input_sql_administrator_login_password"></a> [sql\_administrator\_login\_password](#input\_sql\_administrator\_login\_password)
+
+Description: The Password associated with the sql\_administrator\_login for the SQL administrator. If this is not provided customer\_managed\_key must be provided.
+
+Type: `string`
+
 ### <a name="input_storage_data_lake_gen2_filesystem_id"></a> [storage\_data\_lake\_gen2\_filesystem\_id](#input\_storage\_data\_lake\_gen2\_filesystem\_id)
 
 Description: Specifies the ID of storage data lake gen2 filesystem resource. Changing this forces a new resource to be created.
 
 Type: `string`
+
+### <a name="input_tags"></a> [tags](#input\_tags)
+
+Description: The map of tags to be applied to the resource
+
+Type: `map(any)`
 
 ## Optional Inputs
 
@@ -181,40 +194,6 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
-
-Description: A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
-
-Type:
-
-```hcl
-map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
-  }))
-```
-
-Default: `{}`
-
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
 Description: This variable controls whether or not telemetry is enabled for the module.  
@@ -276,29 +255,6 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_location"></a> [location](#input\_location)
-
-Description: Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_lock"></a> [lock](#input\_lock)
-
-Description: The lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-
-Type:
-
-```hcl
-object({
-    name = optional(string, null)
-    kind = optional(string, "None")
-  })
-```
-
-Default: `{}`
-
 ### <a name="input_managed_resource_group_name"></a> [managed\_resource\_group\_name](#input\_managed\_resource\_group\_name)
 
 Description: Workspace managed resource group. Changing this forces a new resource to be created.
@@ -314,62 +270,6 @@ Description: Is Virtual Network enabled for all computes in this workspace? Chan
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_private_endpoints"></a> [private\_endpoints](#input\_private\_endpoints)
-
-Description: A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-
-Type:
-
-```hcl
-map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      name = optional(string, null)
-      kind = optional(string, "None")
-    }), {})
-    tags                                    = optional(map(any), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
-  }))
-```
-
-Default: `{}`
 
 ### <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled)
 
@@ -406,6 +306,8 @@ Type:
 map(object({
     role_definition_id_or_name             = string
     principal_id                           = string
+    principal_type                         = optional(string, null)
+    principal_display_name                 = optional(string, null)
     description                            = optional(string, null)
     skip_service_principal_aad_check       = optional(bool, false)
     condition                              = optional(string, null)
@@ -424,14 +326,6 @@ Type: `string`
 
 Default: `"SQLAdmin"`
 
-### <a name="input_sql_administrator_login_password"></a> [sql\_administrator\_login\_password](#input\_sql\_administrator\_login\_password)
-
-Description: The Password associated with the sql\_administrator\_login for the SQL administrator. If this is not provided customer\_managed\_key must be provided.
-
-Type: `string`
-
-Default: `"null"`
-
 ### <a name="input_sql_identity_control_enabled"></a> [sql\_identity\_control\_enabled](#input\_sql\_identity\_control\_enabled)
 
 Description: Are pipelines (running as workspace's system assigned identity) allowed to access SQL pools?
@@ -439,14 +333,6 @@ Description: Are pipelines (running as workspace's system assigned identity) all
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_tags"></a> [tags](#input\_tags)
-
-Description: The map of tags to be applied to the resource
-
-Type: `map(any)`
-
-Default: `{}`
 
 ### <a name="input_use_access_policy"></a> [use\_access\_policy](#input\_use\_access\_policy)
 
@@ -460,11 +346,11 @@ Default: `false`
 
 The following outputs are exported:
 
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource ID of the Synapse Workspace.
+
 ### <a name="output_synapse_workspace"></a> [synapse\_workspace](#output\_synapse\_workspace)
-
-Description: This is the full output for the resource.
-
-### <a name="output_synapse_workspace_id"></a> [synapse\_workspace\_id](#output\_synapse\_workspace\_id)
 
 Description: This is the full output for the resource.
 

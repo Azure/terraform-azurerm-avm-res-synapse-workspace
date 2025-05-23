@@ -192,11 +192,26 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 module "test" {
   source = "../../"
 
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  location = azurerm_resource_group.this.location
+  lock = {
+    name       = "synapse-lock"
+    lock_level = "None"
+  }
+  # source             = "Azure/avm-res-synapse-workspace/azurerm"
+  name                                 = "synapse-test-workspace-avm"
+  resource_group_name                  = azurerm_resource_group.this.name
+  sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  tags                                 = var.tags
+  cmk_enabled                          = var.cmk_enabled
+  enable_telemetry                     = var.enable_telemetry # see variables.tf
+  identity_type                        = "SystemAssigned"
+  sql_administrator_login              = var.sql_administrator_login
+
+  depends_on = [
+    module.key_vault,
+    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+  ]
 }
 ```
 
@@ -209,9 +224,9 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.28.0, < 5.0.0)
 
-- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
+- <a name="requirement_http"></a> [http](#requirement\_http) (>= 3.5.0)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0)
 
 ## Resources
 
@@ -246,8 +261,8 @@ Default: `false`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
-Description: This variable controls whether or not telemetry is enabled for the module.
-For more information see <https://aka.ms/avm/telemetryinfo>.
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
 If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
