@@ -10,7 +10,8 @@ output "synapse_workspace" {
   value       = azurerm_synapse_workspace.this.name # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
 }
 
-output "synapse_workspace_id" {
-  description = "This is the full output for the resource."
-  value       = azurerm_synapse_workspace.this.id # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
+output "resource_id" {
+  value = azurerm_synapse_workspace.this.id
 }
+
+
