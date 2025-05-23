@@ -3,16 +3,14 @@
 #   value       = azurerm_private_endpoint.this
 # }
 
+output "resource_id" {
+  description = "The resource ID of the Synapse Workspace."
+  value       = azurerm_synapse_workspace.this.id
+}
+
 # Module owners should include the full resource via a 'resource' output
 # https://azure.github.io/Azure-Verified-Modules/specs/terraform/#id-tffr2---category-outputs---additional-terraform-outputs
 output "synapse_workspace" {
   description = "This is the full output for the resource."
   value       = azurerm_synapse_workspace.this.name # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
 }
-
-output "resource_id" {
-  value       = azurerm_synapse_workspace.this.id
-  description = "The resource ID of the Synapse Workspace."
-}
-
-
