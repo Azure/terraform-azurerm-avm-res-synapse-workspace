@@ -51,13 +51,24 @@ data "azurerm_client_config" "current" {}
 # Creating Key vault to store sql admin secrets
 
 module "key_vault" {
-  source                        = "Azure/avm-res-keyvault-vault/azurerm"
-  name                          = module.naming.key_vault.name_unique
-  location                      = azurerm_resource_group.this.location
-  enable_telemetry              = var.enable_telemetry
-  resource_group_name           = azurerm_resource_group.this.name
-  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  source = "Azure/avm-res-keyvault-vault/azurerm"
+
+  location            = azurerm_resource_group.this.location
+  name                = module.naming.key_vault.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  enable_telemetry    = var.enable_telemetry
+  network_acls = {
+    bypass   = "AzureServices"
+    ip_rules = ["${data.http.ip.response_body}/32"]
+  }
   public_network_access_enabled = true
+  role_assignments = {
+    deployment_user_kv_admin = {
+      role_definition_id_or_name = "Key Vault Administrator"
+      principal_id               = data.azurerm_client_config.current.object_id
+    }
+  }
   secrets = {
     test_secret = {
       name = var.sql_administrator_login
@@ -66,39 +77,29 @@ module "key_vault" {
   secrets_value = {
     test_secret = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password)
   }
-  role_assignments = {
-    deployment_user_kv_admin = {
-      role_definition_id_or_name = "Key Vault Administrator"
-      principal_id               = data.azurerm_client_config.current.object_id
-    }
-  }
   wait_for_rbac_before_secret_operations = {
     create = "60s"
   }
-  network_acls = {
-    bypass   = "AzureServices"
-    ip_rules = ["${data.http.ip.response_body}/32"]
-  }
+
   depends_on = [azurerm_resource_group.this]
 }
 
 # Creating ADLS and file system for Synapse 
 
 module "azure_data_lake_storage" {
-  source                        = "Azure/avm-res-storage-storageaccount/azurerm"
-  version                       = "0.2.7"
-  account_replication_type      = "LRS"
-  account_tier                  = "Standard"
-  account_kind                  = "StorageV2"
+  source  = "Azure/avm-res-storage-storageaccount/azurerm"
+  version = "0.2.7"
+
   location                      = azurerm_resource_group.this.location
   name                          = module.naming.storage_account.name_unique
-  https_traffic_only_enabled    = true
   resource_group_name           = azurerm_resource_group.this.name
-  min_tls_version               = "TLS1_2"
-  shared_access_key_enabled     = true
+  account_kind                  = "StorageV2"
+  account_replication_type      = "LRS"
+  account_tier                  = "Standard"
+  https_traffic_only_enabled    = true
   is_hns_enabled                = true
+  min_tls_version               = "TLS1_2"
   public_network_access_enabled = true
-  tags                          = var.tags
   role_assignments = {
     role_assignment_1 = {
       role_definition_id_or_name       = "Owner"
@@ -106,9 +107,12 @@ module "azure_data_lake_storage" {
       skip_service_principal_aad_check = false
     },
   }
+  shared_access_key_enabled = true
   storage_data_lake_gen2_filesystem = {
     name = var.storage_data_lake_gen2_filesystem_name
   }
+  tags = var.tags
+
   depends_on = [azurerm_resource_group.this]
 }
 
@@ -121,11 +125,13 @@ data "azurerm_storage_data_lake_gen2_filesystem" "storage_data_lake_gen2_filesys
 
 module "azurerm_synapse_workspace" {
   source = "../.."
+
+  name = "synapse-workspace"
   # source             = "Azure/avm-res-synapse-workspace"
   resource_group_name                  = azurerm_resource_group.this.name
-  location                             = azurerm_resource_group.this.location
-  name                                 = "synapse-workspace"
   storage_data_lake_gen2_filesystem_id = data.azurerm_storage_data_lake_gen2_filesystem.storage_data_lake_gen2_filesystem_id
+  location                             = azurerm_resource_group.this.location
+
   depends_on = [
     module.key_vault,
     moduule.azure_data_lake_storage

@@ -1,9 +1,9 @@
 resource "azurerm_key_vault_access_policy" "synapsepolicy" {
-  count        = var.cmk_enabled && var.use_access_policy ? 1 : 0
-  key_vault_id = var.key_vault_id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_synapse_workspace.this.identity[0].principal_id
+  count = var.cmk_enabled && var.use_access_policy ? 1 : 0
 
+  key_vault_id = var.key_vault_id
+  object_id    = azurerm_synapse_workspace.this.identity[0].principal_id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
   key_permissions = [
     "Get",
     "WrapKey",
@@ -12,8 +12,9 @@ resource "azurerm_key_vault_access_policy" "synapsepolicy" {
 }
 
 resource "azurerm_role_assignment" "example" {
-  count                = var.cmk_enabled && var.use_access_policy ? 1 : 0
+  count = var.cmk_enabled && var.use_access_policy ? 1 : 0
+
+  principal_id         = azurerm_synapse_workspace.this.identity[0].principal_id
   scope                = var.key_vault_id
   role_definition_name = "Key Vault Crypto Officer"
-  principal_id         = azurerm_synapse_workspace.this.identity[0].principal_id
 }

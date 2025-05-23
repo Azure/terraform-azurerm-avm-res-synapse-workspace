@@ -1,3 +1,15 @@
+# variable "storage_data_lake_gen2_filesystem_name" {
+#   type        = string
+#   description = "Specifies the name of storage data lake gen2 filesystem resource."
+#   default     = "synapseadls_fs"
+# }
+
+variable "cmk_enabled" {
+  type        = bool
+  default     = false
+  description = "Flag to enable the customer_managed_key block."
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -7,12 +19,6 @@ For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
-
-# variable "storage_data_lake_gen2_filesystem_name" {
-#   type        = string
-#   description = "Specifies the name of storage data lake gen2 filesystem resource."
-#   default     = "synapseadls_fs"
-# }
 
 variable "sql_administrator_login" {
   type        = string
@@ -25,11 +31,3 @@ variable "tags" {
   default     = {}
   description = "The map of tags to be applied to the resource"
 }
-
-variable "cmk_enabled" {
-  description = "Flag to enable the customer_managed_key block."
-  type        = bool
-  default     = false
-}
-
-

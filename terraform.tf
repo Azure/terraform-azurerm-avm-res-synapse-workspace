@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 4.28.0, < 5.0.0" # Latest version published a day ago [1](https://registry.terraform.io/providers/hashicorp/azurerm/latest)
     }
+    modtm = {
+      source  = "Azure/modtm"
+      version = "~> 0.3"
+    }
     random = {
       source  = "hashicorp/random"
       version = ">= 3.6.0, < 4.0" # Latest stable version
