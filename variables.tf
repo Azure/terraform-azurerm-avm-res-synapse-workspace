@@ -76,50 +76,50 @@ variable "data_exfiltration_protection_enabled" {
   description = "Is data exfiltration protection enabled in this workspace? If set to true, managed_virtual_network_enabled must also be set to true. Changing this forces a new resource to be created."
 }
 
-variable "diagnostic_settings" {
-  type = map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+# variable "diagnostic_settings" {
+#   type = map(object({
+#     name                                     = optional(string, null)
+#     log_categories                           = optional(set(string), [])
+#     log_groups                               = optional(set(string), ["allLogs"])
+#     metric_categories                        = optional(set(string), ["AllMetrics"])
+#     log_analytics_destination_type           = optional(string, "Dedicated")
+#     workspace_resource_id                    = optional(string, null)
+#     storage_account_resource_id              = optional(string, null)
+#     event_hub_authorization_rule_resource_id = optional(string, null)
+#     event_hub_name                           = optional(string, null)
+#     marketplace_partner_resource_id          = optional(string, null)
+#   }))
+#   default     = {}
+#   description = <<DESCRIPTION
+# A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
-DESCRIPTION
-  nullable    = false
+# - `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
+# - `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
+# - `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
+# - `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
+# - `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
+# - `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
+# - `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
+# - `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
+# - `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
+# - `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
+# DESCRIPTION
+#   nullable    = false
 
-  validation {
-    condition     = alltrue([for _, v in var.diagnostic_settings : contains(["Dedicated", "AzureDiagnostics"], v.log_analytics_destination_type)])
-    error_message = "Log analytics destination type must be one of: 'Dedicated', 'AzureDiagnostics'."
-  }
-  validation {
-    condition = alltrue(
-      [
-        for _, v in var.diagnostic_settings :
-        v.workspace_resource_id != null || v.storage_account_resource_id != null || v.event_hub_authorization_rule_resource_id != null || v.marketplace_partner_resource_id != null
-      ]
-    )
-    error_message = "At least one of `workspace_resource_id`, `storage_account_resource_id`, `marketplace_partner_resource_id`, or `event_hub_authorization_rule_resource_id`, must be set."
-  }
-}
+#   validation {
+#     condition     = alltrue([for _, v in var.diagnostic_settings : contains(["Dedicated", "AzureDiagnostics"], v.log_analytics_destination_type)])
+#     error_message = "Log analytics destination type must be one of: 'Dedicated', 'AzureDiagnostics'."
+#   }
+#   validation {
+#     condition = alltrue(
+#       [
+#         for _, v in var.diagnostic_settings :
+#         v.workspace_resource_id != null || v.storage_account_resource_id != null || v.event_hub_authorization_rule_resource_id != null || v.marketplace_partner_resource_id != null
+#       ]
+#     )
+#     error_message = "At least one of `workspace_resource_id`, `storage_account_resource_id`, `marketplace_partner_resource_id`, or `event_hub_authorization_rule_resource_id`, must be set."
+#   }
+# }
 
 variable "enable_telemetry" {
   type        = bool
@@ -171,11 +171,11 @@ variable "linking_allowed_for_aad_tenant_ids" {
 
 variable "location" {
   type        = string
-  default     = null
   description = "Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location."
 }
 
 variable "lock" {
+  description = "values are `None`, `CanNotDelete`, and `ReadOnly`."
   type = object({
     kind = string
     name = optional(string, null)
@@ -209,6 +209,7 @@ variable "private_endpoints" {
       condition                              = optional(string, null)
       condition_version                      = optional(string, null)
       delegated_managed_identity_resource_id = optional(string, null)
+      principal_type                         = optional(string, null)
     })), {})
     lock = optional(object({
       name = optional(string, null)
@@ -266,6 +267,8 @@ variable "role_assignments" {
   type = map(object({
     role_definition_id_or_name             = string
     principal_id                           = string
+    principal_type                         = optional(string, null)
+    principal_display_name                 = optional(string, null)
     description                            = optional(string, null)
     skip_service_principal_aad_check       = optional(bool, false)
     condition                              = optional(string, null)
@@ -308,7 +311,6 @@ variable "sql_identity_control_enabled" {
 # tflint-ignore: terraform_unused_declarations
 variable "tags" {
   type        = map(any)
-  default     = {}
   description = "The map of tags to be applied to the resource"
 }
 
