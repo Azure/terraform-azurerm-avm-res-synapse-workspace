@@ -1,16 +1,16 @@
 # TODO: insert locals here.
 locals {
-  private_endpoint_application_security_group_associations = {
-    for assoc in flatten([
-      for pe_k, pe_v in var.private_endpoints : [
-        for asg_k, asg_v in try(pe_v.application_security_group_associations, {}) : {
-          asg_key         = asg_k
-          pe_key          = pe_k
-          asg_resource_id = asg_v
-        }
-      ]
-    ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc
-  }
+  # private_endpoint_application_security_group_associations = {
+  #   for assoc in flatten([
+  #     for pe_k, pe_v in var.private_endpoints : [
+  #       for asg_k, asg_v in try(pe_v.application_security_group_associations, {}) : {
+  #         asg_key         = asg_k
+  #         pe_key          = pe_k
+  #         asg_resource_id = asg_v
+  #       }
+  #     ]
+  #   ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc
+  # }
   resource_group_location = coalesce(
     var.location,
     try(data.azurerm_resource_group.parent.location, null)
