@@ -14,9 +14,9 @@ resource "random_integer" "region_index" {
 
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = ">= 0.3.0"
-  unique-include-numbers = true
+  source        = "Azure/naming/azurerm"
+  version       = ">= 0.3.0"
+  unique-length = 7
 }
 
 # This is required for resource modules
@@ -49,6 +49,7 @@ module "key_vault" {
   version                       = "0.10.0"
   name                          = module.naming.key_vault.name_unique
   location                      = azurerm_resource_group.this.location
+  sku_name                      = "standard"
   enable_telemetry              = var.enable_telemetry
   resource_group_name           = azurerm_resource_group.this.name
   tenant_id                     = data.azurerm_client_config.current.tenant_id
@@ -121,18 +122,18 @@ data "azurerm_key_vault_secret" "sql_admin" {
 # }
 
 resource "azurerm_storage_account" "adls" {
-  name                     = module.naming.storage_account.name_unique
-  resource_group_name      = azurerm_resource_group.this.name
-  location                 = azurerm_resource_group.this.location
-  account_kind             = "StorageV2"
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  is_hns_enabled           = true
-  min_tls_version          = "TLS1_2"
-  https_traffic_only_enabled = true
+  name                          = module.naming.storage_account.name_unique
+  resource_group_name           = azurerm_resource_group.this.name
+  location                      = azurerm_resource_group.this.location
+  account_kind                  = "StorageV2"
+  account_tier                  = "Standard"
+  account_replication_type      = "LRS"
+  is_hns_enabled                = true
+  min_tls_version               = "TLS1_2"
+  https_traffic_only_enabled    = true
   public_network_access_enabled = true
-  shared_access_key_enabled = true
-  tags                     = var.tags
+  shared_access_key_enabled     = true
+  tags                          = var.tags
 
   depends_on = [azurerm_resource_group.this]
 }
@@ -168,8 +169,8 @@ module "synapse" {
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   resource_group_name                  = azurerm_resource_group.this.name
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
-  depends_on = [ 
+  depends_on = [
     module.key_vault,
     azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
-   ]
+  ]
 }
