@@ -27,26 +27,40 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.5.0)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.28.0, < 5.0.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71.0, < 4.0)
+- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.6.0, < 4.0)
+
+## Providers
+
+The following providers are used by this module:
+
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 4.28.0, < 5.0.0)
+
+- <a name="provider_modtm"></a> [modtm](#provider\_modtm) (~> 0.3)
+
+- <a name="provider_random"></a> [random](#provider\_random) (>= 3.6.0, < 4.0)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [azurerm_key_vault_access_policy.synapsepolicy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
-- [azurerm_private_endpoint.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
-- [azurerm_resource_group.TODO](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_role_assignment.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
-- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/hashicorp/modtm/latest/docs/resources/telemetry) (resource)
+- [azurerm_synapse_workspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace) (resource)
+- [azurerm_synapse_workspace_aad_admin.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_aad_admin) (resource)
+- [azurerm_synapse_workspace_key.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_key) (resource)
+- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/resources/telemetry) (resource)
+- [random_password.synapse_sql_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
-- [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
+- [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
-- [modtm_module_source.telemetry](https://registry.terraform.io/providers/hashicorp/modtm/latest/docs/data-sources/module_source) (data source)
+- [modtm_module_source.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -65,26 +79,99 @@ Description: The resource group where the resources will be deployed.
 
 Type: `string`
 
+### <a name="input_storage_data_lake_gen2_filesystem_id"></a> [storage\_data\_lake\_gen2\_filesystem\_id](#input\_storage\_data\_lake\_gen2\_filesystem\_id)
+
+Description: Specifies the ID of storage data lake gen2 filesystem resource. Changing this forces a new resource to be created.
+
+Type: `string`
+
 ## Optional Inputs
 
 The following input variables are optional (have default values):
 
-### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
+### <a name="input_aad_admin_obj_id"></a> [aad\_admin\_obj\_id](#input\_aad\_admin\_obj\_id)
 
-Description: Customer managed keys that should be associated with the resource.
+Description: The Object ID of AAD group to be added as an admin
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_azure_devops_repo"></a> [azure\_devops\_repo](#input\_azure\_devops\_repo)
+
+Description: Optional map for Azure DevOps repository configuration.
 
 Type:
 
 ```hcl
 object({
-    key_vault_resource_id              = optional(string)
-    key_name                           = optional(string)
-    key_version                        = optional(string, null)
-    user_assigned_identity_resource_id = optional(string, null)
+    account_name    = string
+    branch_name     = string
+    last_commit_id  = optional(string)
+    project_name    = string
+    repository_name = string
+    root_folder     = string
+    tenant_id       = optional(string)
   })
 ```
 
-Default: `{}`
+Default: `null`
+
+### <a name="input_azuread_authentication_only"></a> [azuread\_authentication\_only](#input\_azuread\_authentication\_only)
+
+Description: Is Azure Active Directory Authentication the only way to authenticate with resources inside this synapse Workspace.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_cmk_enabled"></a> [cmk\_enabled](#input\_cmk\_enabled)
+
+Description: Flag to enable the customer\_managed\_key block.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_cmk_key_name"></a> [cmk\_key\_name](#input\_cmk\_key\_name)
+
+Description: An identifier for the key. Defaults to 'cmk' if not specified.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_cmk_key_versionless_id"></a> [cmk\_key\_versionless\_id](#input\_cmk\_key\_versionless\_id)
+
+Description: The Azure Key Vault Key Versionless ID to be used as the Customer Managed Key (CMK) for double encryption.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_cmk_user_assigned_identity_id"></a> [cmk\_user\_assigned\_identity\_id](#input\_cmk\_user\_assigned\_identity\_id)
+
+Description: The User Assigned Identity ID to be used for accessing the Customer Managed Key for encryption.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_compute_subnet_id"></a> [compute\_subnet\_id](#input\_compute\_subnet\_id)
+
+Description: The ID of the subnet to use for the compute resources. Changing this forces a new resource to be created.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_data_exfiltration_protection_enabled"></a> [data\_exfiltration\_protection\_enabled](#input\_data\_exfiltration\_protection\_enabled)
+
+Description: Is data exfiltration protection enabled in this workspace? If set to true, managed\_virtual\_network\_enabled must also be set to true. Changing this forces a new resource to be created.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
 
@@ -130,6 +217,57 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_github_repo"></a> [github\_repo](#input\_github\_repo)
+
+Description: Optional block for GitHub repository configuration.
+
+Type:
+
+```hcl
+object({
+    account_name    = string
+    branch_name     = string
+    repository_name = string
+    root_folder     = string
+    last_commit_id  = optional(string)
+    git_url         = optional(string)
+  })
+```
+
+Default: `null`
+
+### <a name="input_identity_ids"></a> [identity\_ids](#input\_identity\_ids)
+
+Description: Specifies a list of User Assigned Managed Identity IDs to be assigned to this Synapse Workspace. This is required when type is set to UserAssigned or SystemAssigned, UserAssigned.
+
+Type: `list(string)`
+
+Default: `null`
+
+### <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type)
+
+Description: Specifies the type of Managed Service Identity that should be associated with this Synapse Workspace. Possible values: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned.
+
+Type: `string`
+
+Default: `"SystemAssigned"`
+
+### <a name="input_key_vault_id"></a> [key\_vault\_id](#input\_key\_vault\_id)
+
+Description: The ID of the Key Vault
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_linking_allowed_for_aad_tenant_ids"></a> [linking\_allowed\_for\_aad\_tenant\_ids](#input\_linking\_allowed\_for\_aad\_tenant\_ids)
+
+Description: A set of AAD tenant IDs that are allowed to link to this workspace. If not specified, all tenants are allowed.
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### <a name="input_location"></a> [location](#input\_location)
 
 Description: Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location.
@@ -153,20 +291,21 @@ object({
 
 Default: `{}`
 
-### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
+### <a name="input_managed_resource_group_name"></a> [managed\_resource\_group\_name](#input\_managed\_resource\_group\_name)
 
-Description: Managed identities to be created for the resource.
+Description: Workspace managed resource group. Changing this forces a new resource to be created.
 
-Type:
+Type: `string`
 
-```hcl
-object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-```
+Default: `null`
 
-Default: `{}`
+### <a name="input_managed_virtual_network_enabled"></a> [managed\_virtual\_network\_enabled](#input\_managed\_virtual\_network\_enabled)
+
+Description: Is Virtual Network enabled for all computes in this workspace? Changing this forces a new resource to be created.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_private_endpoints"></a> [private\_endpoints](#input\_private\_endpoints)
 
@@ -224,6 +363,22 @@ map(object({
 
 Default: `{}`
 
+### <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled)
+
+Description: Whether public network access is enabled for the workspace. Defaults to true.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_purview_id"></a> [purview\_id](#input\_purview\_id)
+
+Description: The ID of the Purview account to link to the Synapse workspace. If not specified, no link will be created.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
 Description: A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
@@ -253,6 +408,30 @@ map(object({
 
 Default: `{}`
 
+### <a name="input_sql_administrator_login"></a> [sql\_administrator\_login](#input\_sql\_administrator\_login)
+
+Description: Specifies The login name of the SQL administrator. Changing this forces a new resource to be created. If this is not provided customer\_managed\_key must be provided.
+
+Type: `string`
+
+Default: `"SQLAdmin"`
+
+### <a name="input_sql_administrator_login_password"></a> [sql\_administrator\_login\_password](#input\_sql\_administrator\_login\_password)
+
+Description: The Password associated with the sql\_administrator\_login for the SQL administrator. If this is not provided customer\_managed\_key must be provided.
+
+Type: `string`
+
+Default: `"null"`
+
+### <a name="input_sql_identity_control_enabled"></a> [sql\_identity\_control\_enabled](#input\_sql\_identity\_control\_enabled)
+
+Description: Are pipelines (running as workspace's system assigned identity) allowed to access SQL pools?
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: The map of tags to be applied to the resource
@@ -261,15 +440,23 @@ Type: `map(any)`
 
 Default: `{}`
 
+### <a name="input_use_access_policy"></a> [use\_access\_policy](#input\_use\_access\_policy)
+
+Description: Use access policy instead of RBAC role
+
+Type: `bool`
+
+Default: `false`
+
 ## Outputs
 
 The following outputs are exported:
 
-### <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints)
+### <a name="output_synapse_workspace"></a> [synapse\_workspace](#output\_synapse\_workspace)
 
-Description: A map of private endpoints. The map key is the supplied input to var.private\_endpoints. The map value is the entire azurerm\_private\_endpoint resource.
+Description: This is the full output for the resource.
 
-### <a name="output_resource"></a> [resource](#output\_resource)
+### <a name="output_synapse_workspace_id"></a> [synapse\_workspace\_id](#output\_synapse\_workspace\_id)
 
 Description: This is the full output for the resource.
 
