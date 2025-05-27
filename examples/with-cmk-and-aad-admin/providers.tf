@@ -28,7 +28,6 @@ terraform {
   }
 }
 
-
 provider "azurerm" {
   features {}
 }
