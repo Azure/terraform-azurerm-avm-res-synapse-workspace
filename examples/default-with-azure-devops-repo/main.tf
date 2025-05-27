@@ -158,7 +158,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 }
 
 # This is the module call for Synapse Workspace
-# This is the module call
+# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
@@ -181,6 +181,16 @@ module "synapse" {
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
   sql_administrator_login              = var.sql_administrator_login
+  azure_devops_repo = {
+    account_name    = "devops-account"
+    branch_name     = "main"
+    project_name    = "synapse-project"
+    repository_name = "synapse-repo"
+    root_folder     = "/"
+    last_commit_id  = "abc123def456"
+    tenant_id       = "00000000-0000-0000-0000-000000000000"
+  }
+
 
   depends_on = [
     module.key_vault,
