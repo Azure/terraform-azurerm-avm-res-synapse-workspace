@@ -166,21 +166,20 @@ module "synapse" {
   source = "../.."
 
   location = azurerm_resource_group.this.location
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
   name                                 = "synapse-test-workspace-avm"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
-  tags                                 = var.tags
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-  sql_administrator_login              = var.sql_administrator_login
+  lock = {
+    name       = "synapse-lock"
+    lock_level = "None"
+    kind       = "None"
+  }
+  sql_administrator_login = var.sql_administrator_login
   azure_devops_repo = {
     account_name    = "devops-account"
     branch_name     = "main"
@@ -191,6 +190,7 @@ module "synapse" {
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
 
+  tags                    = var.tags
 
   depends_on = [
     module.key_vault,
