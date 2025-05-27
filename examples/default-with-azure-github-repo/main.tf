@@ -174,7 +174,7 @@ module "synapse" {
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-    github_repo = {
+  github_repo = {
     account_name    = "github-user"
     branch_name     = "main"
     repository_name = "synapse-repo"

@@ -174,7 +174,7 @@ module "synapse" {
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-    azure_devops_repo = {
+  azure_devops_repo = {
     account_name    = "devops-account"
     branch_name     = "main"
     project_name    = "synapse-project"
