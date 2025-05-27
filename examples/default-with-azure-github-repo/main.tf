@@ -159,6 +159,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 
 # This is the module call for Synapse Workspace
 # This module creates a Synapse Workspace with the specified parameters.
+# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
@@ -174,12 +175,6 @@ module "synapse" {
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
-  sql_administrator_login = var.sql_administrator_login
   github_repo = {
     account_name    = "github-user"
     branch_name     = "main"
@@ -187,7 +182,14 @@ module "synapse" {
     root_folder     = "/"
     git_url         = "https://github.com/github-user/synapse-repo.git"
     last_commit_id  = "abc123def456"
-  }  tags                    = var.tags
+  }
+  lock = {
+    name       = "synapse-lock"
+    lock_level = "None"
+    kind       = "None"
+  }
+  sql_administrator_login = var.sql_administrator_login
+  tags                    = var.tags
 
   depends_on = [
     module.key_vault,

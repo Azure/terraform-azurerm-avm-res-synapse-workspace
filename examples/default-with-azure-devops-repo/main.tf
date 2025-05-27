@@ -159,6 +159,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 
 # This is the module call for Synapse Workspace
 # This module creates a Synapse Workspace with the specified parameters.
+# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
@@ -174,12 +175,6 @@ module "synapse" {
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
-  sql_administrator_login = var.sql_administrator_login
   azure_devops_repo = {
     account_name    = "devops-account"
     branch_name     = "main"
@@ -189,7 +184,12 @@ module "synapse" {
     last_commit_id  = "abc123def456"
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
-
+  lock = {
+    name       = "synapse-lock"
+    lock_level = "None"
+    kind       = "None"
+  }
+  sql_administrator_login = var.sql_administrator_login
   tags                    = var.tags
 
   depends_on = [
