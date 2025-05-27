@@ -166,22 +166,15 @@ module "synapse" {
   source = "../.."
 
   location = azurerm_resource_group.this.location
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
   name                                 = "synapse-test-workspace-avm"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
-  tags                                 = var.tags
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-  sql_administrator_login              = var.sql_administrator_login
-  github_repo = {
+    github_repo = {
     account_name    = "github-user"
     branch_name     = "main"
     repository_name = "synapse-repo"
@@ -189,6 +182,14 @@ module "synapse" {
     git_url         = "https://github.com/github-user/synapse-repo.git"
     last_commit_id  = "abc123def456"
   }
+  lock = {
+    name       = "synapse-lock"
+    lock_level = "None"
+    kind       = "None"
+  }
+  sql_administrator_login = var.sql_administrator_login
+  tags                    = var.tags
+
   depends_on = [
     module.key_vault,
     azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs

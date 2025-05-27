@@ -62,19 +62,6 @@ Description: Azure region where the resource should be deployed.  If null, the l
 
 Type: `string`
 
-### <a name="input_lock"></a> [lock](#input\_lock)
-
-Description: values are `None`, `CanNotDelete`, and `ReadOnly`.
-
-Type:
-
-```hcl
-object({
-    kind = string
-    name = optional(string, null)
-  })
-```
-
 ### <a name="input_name"></a> [name](#input\_name)
 
 Description: The name of the this resource.
@@ -98,12 +85,6 @@ Type: `string`
 Description: Specifies the ID of storage data lake gen2 filesystem resource. Changing this forces a new resource to be created.
 
 Type: `string`
-
-### <a name="input_tags"></a> [tags](#input\_tags)
-
-Description: The map of tags to be applied to the resource
-
-Type: `map(any)`
 
 ## Optional Inputs
 
@@ -254,6 +235,24 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_lock"></a> [lock](#input\_lock)
+
+Description:   Controls the Resource Lock configuration for this resource. The following properties can be specified:
+
+  - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
+  - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
+
+Type:
+
+```hcl
+object({
+    kind = string
+    name = optional(string, null)
+  })
+```
+
+Default: `null`
+
 ### <a name="input_managed_resource_group_name"></a> [managed\_resource\_group\_name](#input\_managed\_resource\_group\_name)
 
 Description: Workspace managed resource group. Changing this forces a new resource to be created.
@@ -288,16 +287,18 @@ Default: `null`
 
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
-Description: A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+Description:   A map of role assignments to create on the <RESOURCE>. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
-- `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
-- `principal_id` - The ID of the principal to assign the role to.
-- `description` - The description of the role assignment.
-- `skip_service_principal_aad_check` - If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
-- `condition` - The condition which will be used to scope the role assignment.
-- `condition_version` - The version of the condition syntax. Valid values are '2.0'.
+  - `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
+  - `principal_id` - The ID of the principal to assign the role to.
+  - `description` - (Optional) The description of the role assignment.
+  - `skip_service_principal_aad_check` - (Optional) If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
+  - `condition` - (Optional) The condition which will be used to scope the role assignment.
+  - `condition_version` - (Optional) The version of the condition syntax. Leave as `null` if you are not using a condition, if you are then valid values are '2.0'.
+  - `delegated_managed_identity_resource_id` - (Optional) The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created. This field is only used in cross-tenant scenario.
+  - `principal_type` - (Optional) The type of the `principal_id`. Possible values are `User`, `Group` and `ServicePrincipal`. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
 
-> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
+  > Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
 
 Type:
 
@@ -305,13 +306,12 @@ Type:
 map(object({
     role_definition_id_or_name             = string
     principal_id                           = string
-    principal_type                         = optional(string, null)
-    principal_display_name                 = optional(string, null)
     description                            = optional(string, null)
     skip_service_principal_aad_check       = optional(bool, false)
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
 ```
 
@@ -332,6 +332,14 @@ Description: Are pipelines (running as workspace's system assigned identity) all
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_tags"></a> [tags](#input\_tags)
+
+Description: (Optional) A mapping of tags to assign to the Container App.
+
+Type: `map(string)`
+
+Default: `null`
 
 ### <a name="input_use_access_policy"></a> [use\_access\_policy](#input\_use\_access\_policy)
 
