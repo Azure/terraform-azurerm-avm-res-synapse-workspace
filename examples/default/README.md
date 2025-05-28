@@ -164,7 +164,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 }
 
 # This is the module call for Synapse Workspace
-# This is the module call
+# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.

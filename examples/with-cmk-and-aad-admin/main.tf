@@ -171,7 +171,9 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  aad_admin_obj_id                     = data.azurerm_client_config.current.object_id # Object ID of the AAD admin
   cmk_enabled                          = var.cmk_enabled
+  cmk_key_name                         = "synapse-cmk-key"    # Name of the customer managed key
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
   lock = {
@@ -181,12 +183,6 @@ module "synapse" {
   }
   sql_administrator_login = var.sql_administrator_login
   tags                    = var.tags
-
-  cmk_key_name           = "synapse-cmk-key" # Name of the customer managed key
-  #ToDo cmk_key_versionless_id = "https://${module.key_vault.name}.vault.azure.net/keys/synapse-cmk-key/versionless-id" # Versionless ID of the customer managed key
-
-  aad_admin_obj_id = data.azurerm_client_config.current.object_id # Object ID of the AAD admin
-
 
   depends_on = [
     module.key_vault,
