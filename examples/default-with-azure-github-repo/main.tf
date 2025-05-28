@@ -181,12 +181,7 @@ module "synapse" {
     git_url         = "https://github.com/github-user/synapse-repo.git"
     last_commit_id  = "abc123def456"
   }
-  identity_type = "SystemAssigned"
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
+  identity_type           = "SystemAssigned"
   sql_administrator_login = var.sql_administrator_login
   tags                    = var.tags
 
