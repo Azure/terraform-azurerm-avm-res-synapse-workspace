@@ -25,9 +25,12 @@ resource "azurerm_synapse_workspace" "this" {
   public_network_access_enabled        = var.public_network_access_enabled
   purview_id                           = var.purview_id
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, random_password.synapse_sql_admin_password.result)
-  sql_identity_control_enabled         = var.sql_identity_control_enabled
-  tags                                 = var.tags
+  sql_administrator_login_password = (
+    var.sql_administrator_login_password != "" ? var.sql_administrator_login_password :
+    (var.cmk_enabled && var.cmk_key_versionless_id != null ? null : random_password.synapse_sql_admin_password.result)
+  )
+  sql_identity_control_enabled = var.sql_identity_control_enabled
+  tags                         = var.tags
 
   dynamic "azure_devops_repo" {
     for_each = var.azure_devops_repo != null ? [var.azure_devops_repo] : []
@@ -83,7 +86,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 
-  depends_on = [azurerm_key_vault_access_policy.synapsepolicy]
+  depends_on = [azurerm_key_vault_access_policy.synapsepolicy, azurerm_role_assignment.synapse_kv_crypto_user]
 }
 
 resource "azurerm_synapse_workspace_aad_admin" "example" {

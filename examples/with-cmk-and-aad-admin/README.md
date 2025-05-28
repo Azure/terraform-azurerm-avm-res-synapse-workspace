@@ -42,10 +42,10 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
-  length  = 16
-  special = true
-}
+# resource "random_password" "synapse_sql_admin_password" {
+#   length  = 16
+#   special = true
+# }
 
 data "azurerm_client_config" "current" {}
 
@@ -60,6 +60,22 @@ module "key_vault" {
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   enable_telemetry    = var.enable_telemetry
+  # secrets = {
+  #   test_secret = {
+  #     name = var.sql_administrator_login
+  #   }
+  # }
+  # secrets_value = {
+  #   test_secret = random_password.synapse_sql_admin_password.result
+  # }
+  keys = {
+    synapse_cmk_key = {
+      name     = "synapse-cmk-key"
+      key_type = "RSA"
+      key_size = 2048
+      key_opts = ["unwrapKey", "wrapKey"]
+    }
+  }
   network_acls = {
     bypass   = "AzureServices"
     ip_rules = ["${data.http.ip.response_body}/32"]
@@ -71,14 +87,6 @@ module "key_vault" {
       principal_id               = data.azurerm_client_config.current.object_id
     }
   }
-  secrets = {
-    test_secret = {
-      name = var.sql_administrator_login
-    }
-  }
-  secrets_value = {
-    test_secret = random_password.synapse_sql_admin_password.result
-  }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
     create = "60s"
@@ -87,12 +95,12 @@ module "key_vault" {
   depends_on = [azurerm_resource_group.this]
 }
 
-data "azurerm_key_vault_secret" "sql_admin" {
-  key_vault_id = module.key_vault.resource_id
-  name         = var.sql_administrator_login
+# data "azurerm_key_vault_secret" "sql_admin" {
+#   key_vault_id = module.key_vault.resource_id
+#   name         = var.sql_administrator_login
 
-  depends_on = [module.key_vault]
-}
+#   depends_on = [module.key_vault]
+# }
 
 # Creating ADLS and file system for Synapse
 
@@ -175,15 +183,19 @@ module "synapse" {
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
   name                                 = "synapse-test-workspace-avm"
   resource_group_name                  = azurerm_resource_group.this.name
-  sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
+  sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
   aad_admin_obj_id                     = data.azurerm_client_config.current.object_id # Object ID of the AAD admin
+  azuread_authentication_only          = true
   cmk_enabled                          = var.cmk_enabled
-  cmk_key_name                         = "synapse-cmk-key"    # Name of the customer managed key
+  cmk_key_name                         = "synapse-cmk-key" # Name of the customer managed key
+  cmk_key_versionless_id               = module.key_vault.keys.synapse_cmk_key.versionless_id
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
+  key_vault_id                         = module.key_vault.resource_id
   sql_administrator_login              = var.sql_administrator_login
   tags                                 = var.tags
+  use_access_policy                    = false
 
   depends_on = [
     module.key_vault,
@@ -214,9 +226,7 @@ The following resources are used by this module:
 - [azurerm_storage_account.adls](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) (resource)
 - [azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
-- [random_password.synapse_sql_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
-- [azurerm_key_vault_secret.sql_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) (data source)
 - [http_http.ip](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -234,7 +244,7 @@ Description: Flag to enable the customer\_managed\_key block.
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
