@@ -181,14 +181,9 @@ module "synapse" {
     last_commit_id  = "abc123def456"
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
-  cmk_enabled      = var.cmk_enabled
-  enable_telemetry = var.enable_telemetry # see variables.tf
-  identity_type    = "SystemAssigned"
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
+  cmk_enabled             = var.cmk_enabled
+  enable_telemetry        = var.enable_telemetry # see variables.tf
+  identity_type           = "SystemAssigned"
   sql_administrator_login = var.sql_administrator_login
   tags                    = var.tags
 

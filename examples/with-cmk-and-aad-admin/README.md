@@ -182,13 +182,8 @@ module "synapse" {
   cmk_key_name                         = "synapse-cmk-key"    # Name of the customer managed key
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
-  sql_administrator_login = var.sql_administrator_login
-  tags                    = var.tags
+  sql_administrator_login              = var.sql_administrator_login
+  tags                                 = var.tags
 
   depends_on = [
     module.key_vault,

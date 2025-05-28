@@ -201,13 +201,8 @@ module "test" {
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   identity_type                        = "SystemAssigned"
-  lock = {
-    name       = "synapse-lock"
-    lock_level = "None"
-    kind       = "None"
-  }
-  sql_administrator_login = var.sql_administrator_login
-  tags                    = var.tags
+  sql_administrator_login              = var.sql_administrator_login
+  tags                                 = var.tags
 
   depends_on = [
     module.key_vault,
