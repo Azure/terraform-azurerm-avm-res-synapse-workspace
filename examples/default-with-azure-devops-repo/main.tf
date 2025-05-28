@@ -177,7 +177,7 @@ module "synapse" {
     branch_name     = "main"
     project_name    = "synapse-project"
     repository_name = "synapse-repo"
-    root_folder     = "/"
+    root_folder     = "/AzureSynapse"
     last_commit_id  = "abc123def456"
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }

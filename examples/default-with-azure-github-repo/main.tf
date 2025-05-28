@@ -178,7 +178,7 @@ module "synapse" {
     account_name    = "github-user"
     branch_name     = "main"
     repository_name = "synapse-repo"
-    root_folder     = "/"
+    root_folder     = "/AzureSynapse"
     git_url         = "https://github.com/github-user/synapse-repo.git"
     last_commit_id  = "abc123def456"
   }
