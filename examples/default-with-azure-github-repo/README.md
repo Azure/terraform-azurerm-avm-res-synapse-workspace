@@ -164,7 +164,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 }
 
 # This is the module call for Synapse Workspace
-# This is the module call
+# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
@@ -179,7 +179,15 @@ module "synapse" {
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
-  identity_type                        = "SystemAssigned"
+  github_repo = {
+    account_name    = "github-user"
+    branch_name     = "main"
+    repository_name = "synapse-repo"
+    root_folder     = "/"
+    git_url         = "https://github.com/github-user/synapse-repo.git"
+    last_commit_id  = "abc123def456"
+  }
+  identity_type = "SystemAssigned"
   lock = {
     name       = "synapse-lock"
     lock_level = "None"
