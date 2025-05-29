@@ -146,7 +146,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
   name               = "synapseadlsfs"
   storage_account_id = azurerm_storage_account.adls.id
 
-  depends_on = [azurerm_storage_account.adls]
+  depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
 resource "azurerm_role_assignment" "adls_blob_contributor" {
@@ -167,7 +167,7 @@ module "synapse" {
 
   location = azurerm_resource_group.this.location
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
-  name                                 = "synapse-test-workspace-avm"
+  name                                 = "synapse-test-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id

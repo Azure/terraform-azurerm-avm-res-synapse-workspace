@@ -36,11 +36,6 @@ data "http" "ip" {
   }
 }
 
-# resource "random_password" "synapse_sql_admin_password" {
-#   length  = 16
-#   special = true
-# }
-
 data "azurerm_client_config" "current" {}
 
 # Creating Key vault to store sql admin secrets
@@ -54,14 +49,6 @@ module "key_vault" {
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   enable_telemetry    = var.enable_telemetry
-  # secrets = {
-  #   test_secret = {
-  #     name = var.sql_administrator_login
-  #   }
-  # }
-  # secrets_value = {
-  #   test_secret = random_password.synapse_sql_admin_password.result
-  # }
   keys = {
     synapse_cmk_key = {
       name     = "synapse-cmk-key"
@@ -89,50 +76,6 @@ module "key_vault" {
   depends_on = [azurerm_resource_group.this]
 }
 
-# data "azurerm_key_vault_secret" "sql_admin" {
-#   key_vault_id = module.key_vault.resource_id
-#   name         = var.sql_administrator_login
-
-#   depends_on = [module.key_vault]
-# }
-
-# Creating ADLS and file system for Synapse
-
-# module "azure_data_lake_storage" {
-#   source                        = "Azure/avm-res-storage-storageaccount/azurerm"
-#   version                       = "0.6.2"
-#   location                      = azurerm_resource_group.this.location
-#   name                          = module.naming.storage_account.name_unique
-#   resource_group_name           = azurerm_resource_group.this.name
-#   account_kind                  = "StorageV2"
-#   account_replication_type      = "GRS"
-#   account_tier                  = "Standard"
-#   https_traffic_only_enabled    = true
-#   is_hns_enabled                = true
-#   min_tls_version               = "TLS1_2"
-#   public_network_access_enabled = true
-#   shared_access_key_enabled     = true
-#   tags                          = var.tags
-
-#   storage_data_lake_gen2_filesystem = {
-#     synapseadlsfs = {
-#       filesystem = {
-#         name = "synapseadlsfs"
-#       }
-#     }
-#   }
-
-#   role_assignments = {
-#     role_assignment_1 = {
-#       role_definition_id_or_name       = "Storage Blob Data Contributor"
-#       principal_id                     = data.azurerm_client_config.current.object_id
-#       skip_service_principal_aad_check = false
-#     }
-#   }
-
-#   depends_on = [azurerm_resource_group.this]
-# }
-
 resource "azurerm_storage_account" "adls" {
   account_replication_type      = "GRS"
   account_tier                  = "Standard"
@@ -150,19 +93,19 @@ resource "azurerm_storage_account" "adls" {
   depends_on = [azurerm_resource_group.this]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
-  name               = "synapseadlsfs"
-  storage_account_id = azurerm_storage_account.adls.id
-
-  depends_on = [azurerm_storage_account.adls]
-}
-
 resource "azurerm_role_assignment" "adls_blob_contributor" {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = azurerm_storage_account.adls.id
   role_definition_name = "Storage Blob Data Contributor"
 
   depends_on = [azurerm_storage_account.adls]
+}
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
+  name               = "synapseadlsfs"
+  storage_account_id = azurerm_storage_account.adls.id
+
+  depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
 # This is the module call for Synapse Workspace
