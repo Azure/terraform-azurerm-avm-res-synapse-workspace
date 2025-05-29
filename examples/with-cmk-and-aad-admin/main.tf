@@ -119,7 +119,7 @@ module "synapse" {
 
   location = azurerm_resource_group.this.location
   # source             = "Azure/avm-res-synapse-workspace/azurerm"
-  name                                 = "synapse-test-workspace-avm"
+  name                                 = "synapse-cmk-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
