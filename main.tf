@@ -78,6 +78,10 @@ resource "azurerm_synapse_workspace" "this" {
   }
 }
 
+resource "time_sleep" "wait_for_resources" {
+  create_duration = "60s"
+}
+
 resource "azurerm_synapse_workspace_key" "example" {
   count = var.cmk_enabled ? 1 : 0
 
@@ -86,7 +90,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 
-  depends_on = [azurerm_key_vault_access_policy.synapsepolicy, azurerm_role_assignment.synapse_kv_crypto_user]
+  depends_on = [azurerm_key_vault_access_policy.synapsepolicy, azurerm_role_assignment.synapse_kv_crypto_user, time_sleep.wait_for_resources]
 }
 
 resource "azurerm_synapse_workspace_aad_admin" "example" {
@@ -97,7 +101,7 @@ resource "azurerm_synapse_workspace_aad_admin" "example" {
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   tenant_id            = data.azurerm_client_config.current.tenant_id
 
-  depends_on = [azurerm_synapse_workspace.this]
+  depends_on = [azurerm_synapse_workspace_key.example]
 }
 
 
