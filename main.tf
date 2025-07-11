@@ -3,12 +3,16 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
 
-data "azurerm_client_config" "current" {}
+resource "time_sleep" "wait_for_resources" {
+  create_duration = "60s"
+}
 
 # Synapse module resource
 resource "azurerm_synapse_workspace" "this" {
@@ -78,10 +82,6 @@ resource "azurerm_synapse_workspace" "this" {
   }
 }
 
-resource "time_sleep" "wait_for_resources" {
-  create_duration = "60s"
-}
-
 resource "azurerm_synapse_workspace_key" "example" {
   count = var.cmk_enabled ? 1 : 0
 
@@ -103,7 +103,6 @@ resource "azurerm_synapse_workspace_aad_admin" "example" {
 
   depends_on = [azurerm_synapse_workspace_key.example]
 }
-
 
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {
