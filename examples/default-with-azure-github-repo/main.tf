@@ -36,7 +36,7 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
+resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
@@ -71,7 +71,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = random_password.synapse_sql_admin_password.result
+    test_secret = random_password.sql_admin_password.result
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -114,7 +114,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
   depends_on = [azurerm_storage_account.adls]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
   name               = "synapseadlsfs"
   storage_account_id = azurerm_storage_account.adls.id
 
@@ -134,7 +134,7 @@ module "synapse" {
   name                                 = "synapse-testgit-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
-  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   cmk_enabled                          = var.cmk_enabled
   enable_telemetry                     = var.enable_telemetry # see variables.tf
   github_repo = {
@@ -151,6 +151,6 @@ module "synapse" {
 
   depends_on = [
     module.key_vault,
-    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+    azurerm_storage_data_lake_gen2_filesystem.adls_fs
   ]
 }

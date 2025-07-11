@@ -3,7 +3,7 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
-resource "random_password" "synapse_sql_admin_password" {
+resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
@@ -27,7 +27,7 @@ resource "azurerm_synapse_workspace" "this" {
   sql_administrator_login              = var.sql_administrator_login
   sql_administrator_login_password = (
     var.sql_administrator_login_password != "" ? var.sql_administrator_login_password :
-    (var.cmk_enabled && var.cmk_key_versionless_id != null ? null : random_password.synapse_sql_admin_password.result)
+    (var.cmk_enabled && var.cmk_key_versionless_id != null ? null : random_password.sql_admin_password.result)
   )
   sql_identity_control_enabled = var.sql_identity_control_enabled
   tags                         = var.tags
@@ -90,7 +90,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 
-  depends_on = [azurerm_key_vault_access_policy.synapsepolicy, azurerm_role_assignment.synapse_kv_crypto_user, time_sleep.wait_for_resources]
+  depends_on = [azurerm_key_vault_access_policy.kv_policy, azurerm_role_assignment.kv_crypto_user, time_sleep.wait_for_resources]
 }
 
 resource "azurerm_synapse_workspace_aad_admin" "example" {

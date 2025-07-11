@@ -101,7 +101,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
   depends_on = [azurerm_storage_account.adls]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
   name               = "synapseadlsfs"
   storage_account_id = azurerm_storage_account.adls.id
 
@@ -121,7 +121,7 @@ module "synapse" {
   name                                 = "synapse-cmk-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
-  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   aad_admin_obj_id                     = data.azurerm_client_config.current.object_id # Object ID of the AAD admin
   azuread_authentication_only          = true
   cmk_enabled                          = var.cmk_enabled
@@ -136,6 +136,6 @@ module "synapse" {
 
   depends_on = [
     module.key_vault,
-    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+    azurerm_storage_data_lake_gen2_filesystem.adls_fs
   ]
 }
