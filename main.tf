@@ -77,7 +77,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   count = var.cmk_enabled ? 1 : 0
 
   active                              = true
-  customer_managed_key_name           = var.cmk_key_name != null ? var.cmk_key_name : "synk-${var.name}"
+  customer_managed_key_name           = coalesce(var.cmk_key_name, "synk-${var.name}")
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 
