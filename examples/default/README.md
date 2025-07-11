@@ -171,14 +171,13 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 module "synapse" {
   source = "../.."
 
-  location = azurerm_resource_group.this.location
-  # source             = "Azure/avm-res-synapse-workspace/azurerm"
+  location                             = azurerm_resource_group.this.location
   name                                 = "synapse-test-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   cmk_enabled                          = var.cmk_enabled
-  enable_telemetry                     = var.enable_telemetry # see variables.tf
+  enable_telemetry                     = var.enable_telemetry
   identity_type                        = "SystemAssigned"
   sql_administrator_login              = var.sql_administrator_login
   tags                                 = var.tags
