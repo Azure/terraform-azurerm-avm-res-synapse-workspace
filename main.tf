@@ -83,7 +83,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 
-  depends_on = [azurerm_key_vault_access_policy.synapsepolicy, azurerm_role_assignment.synapse_kv_crypto_user, time_sleep.wait_for_resources]
+  depends_on = [azurerm_key_vault_access_policy.kv_policy, azurerm_role_assignment.kv_crypto_user, time_sleep.wait_for_resources]
 }
 
 resource "azurerm_synapse_workspace_aad_admin" "example" {

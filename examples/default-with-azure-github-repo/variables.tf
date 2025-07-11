@@ -11,7 +11,7 @@ variable "sql_administrator_login" {
 }# variable "storage_data_lake_gen2_filesystem_name" {
 #   type        = string
 #   description = "Specifies the name of storage data lake gen2 filesystem resource."
-#   default     = "synapseadls_fs"
+#   default     = "adls_fs"
 # }
 
 variable "cmk_enabled" {
