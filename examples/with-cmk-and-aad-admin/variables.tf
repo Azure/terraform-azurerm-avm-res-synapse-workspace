@@ -6,7 +6,7 @@
 
 variable "cmk_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = "Flag to enable the customer_managed_key block."
 }
 

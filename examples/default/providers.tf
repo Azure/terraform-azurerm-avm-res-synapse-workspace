@@ -10,25 +10,29 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 4.28.0, < 5.0.0"
     }
-    # http = {
-    #   source  = "hashicorp/http"
-    #   version = ">= 3.5.0"
-    # }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.5.0"
+    }
     # local = {
     #   source  = "hashicorp/local"
     #   version = ">= 2.4.0"
     # }
-    modtm = {
-      source  = "azure/modtm"
-      version = ">= 0.1.0"
-    }
+    # modtm = {
+    #   source  = "azure/modtm"
+    #   version = ">= 0.1.0"
+    # }
     random = {
       source  = "hashicorp/random"
       version = ">= 3.5.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.7.0"
+  }
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
     }
   }
 }
