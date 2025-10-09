@@ -27,6 +27,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.5.0)
 
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.28.0, < 5.0.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (>= 0.1.0)
@@ -47,11 +49,9 @@ The following resources are used by this module:
 - [azurerm_synapse_workspace_aad_admin.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_aad_admin) (resource)
 - [azurerm_synapse_workspace_key.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_key) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
-// The example previously used a generated random password which stored secret in terraform state. Use the provided `synapse_sql_admin_password` variable and supply it securely.
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_sleep.wait_for_resources](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
-- [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
-- [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
+- [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
@@ -201,8 +201,8 @@ Default: `false`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
-Description: This variable controls whether or not telemetry is enabled for the module.
-For more information see <https://aka.ms/avm/telemetryinfo>.
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
 If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
@@ -423,13 +423,25 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+### <a name="output_synapse_workspace_id"></a> [synapse\_workspace\_id](#output\_synapse\_workspace\_id)
 
 Description: The resource ID of the Synapse Workspace.
 
-### <a name="output_synapse_workspace"></a> [synapse\_workspace](#output\_synapse\_workspace)
+### <a name="output_synapse_workspace_identity_principal_id"></a> [synapse\_workspace\_identity\_principal\_id](#output\_synapse\_workspace\_identity\_principal\_id)
 
-Description: This is the full output for the resource.
+Description: The principal id of the workspace identity (system assigned). Nullable if identity not enabled.
+
+### <a name="output_synapse_workspace_location"></a> [synapse\_workspace\_location](#output\_synapse\_workspace\_location)
+
+Description: The location/region of the Synapse Workspace.
+
+### <a name="output_synapse_workspace_managed_resource_group_name"></a> [synapse\_workspace\_managed\_resource\_group\_name](#output\_synapse\_workspace\_managed\_resource\_group\_name)
+
+Description: The managed resource group name for the Synapse Workspace (if any).
+
+### <a name="output_synapse_workspace_name"></a> [synapse\_workspace\_name](#output\_synapse\_workspace\_name)
+
+Description: The name of the Synapse Workspace.
 
 ## Modules
 
