@@ -36,7 +36,7 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
+resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
@@ -117,7 +117,7 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
   depends_on = [azurerm_storage_account.adls]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "synapseadls_fs" {
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
   name               = "synapseadlsfs"
   storage_account_id = azurerm_storage_account.adls.id
 
@@ -137,7 +137,7 @@ module "synapse" {
   name                                 = "synapse-testado-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
-  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs.id
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   azure_devops_repo = {
     account_name    = "devops-account"
     branch_name     = "main"
@@ -155,6 +155,6 @@ module "synapse" {
 
   depends_on = [
     module.key_vault,
-    azurerm_storage_data_lake_gen2_filesystem.synapseadls_fs
+    azurerm_storage_data_lake_gen2_filesystem.adls_fs
   ]
 }

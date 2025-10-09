@@ -3,7 +3,9 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
-data "azurerm_client_config" "current" {}
+resource "time_sleep" "wait_for_resources" {
+  create_duration = "60s"
+}
 
 # Synapse module resource
 resource "azurerm_synapse_workspace" "this" {
@@ -71,10 +73,6 @@ resource "azurerm_synapse_workspace" "this" {
   }
 }
 
-resource "time_sleep" "wait_for_resources" {
-  create_duration = "60s"
-}
-
 resource "azurerm_synapse_workspace_key" "example" {
   count = var.cmk_enabled ? 1 : 0
 
@@ -83,7 +81,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 
-  depends_on = [azurerm_key_vault_access_policy.synapsepolicy, azurerm_role_assignment.synapse_kv_crypto_user, time_sleep.wait_for_resources]
+  depends_on = [azurerm_key_vault_access_policy.kv_policy, azurerm_role_assignment.kv_crypto_user, time_sleep.wait_for_resources]
 }
 
 resource "azurerm_synapse_workspace_aad_admin" "example" {
@@ -96,7 +94,6 @@ resource "azurerm_synapse_workspace_aad_admin" "example" {
 
   depends_on = [azurerm_synapse_workspace_key.example]
 }
-
 
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {
