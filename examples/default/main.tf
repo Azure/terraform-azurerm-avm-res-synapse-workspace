@@ -36,9 +36,9 @@ data "http" "ip" {
   }
 }
 
-// NOTE: For automated testing purposes only, this example includes a generated random password.
-// In real usage, do NOT rely on the example generated password as it will end up in terraform state.
-// Module consumers should provide the password securely via variables, secret managers, or CI secrets.
+# NOTE: For automated testing purposes only, this example includes a generated random password.
+# In real usage, do NOT rely on the example generated password as it will end up in terraform state.
+# Module consumers should provide the password securely via variables, secret managers, or CI secrets.
 resource "random_password" "synapse_sql_admin_password" {
   length  = 16
   special = true
