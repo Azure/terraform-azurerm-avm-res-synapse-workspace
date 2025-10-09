@@ -423,7 +423,7 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_synapse_workspace_id"></a> [synapse\_workspace\_id](#output\_synapse\_workspace\_id)
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
 
 Description: The resource ID of the Synapse Workspace.
 
