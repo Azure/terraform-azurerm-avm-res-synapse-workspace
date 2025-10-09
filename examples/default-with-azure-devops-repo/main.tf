@@ -71,8 +71,12 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = random_password.synapse_sql_admin_password.result
+    test_secret = var.synapse_sql_admin_password
   }
+
+  # The following random_password resource is included in the example modules to support
+  # automated testing and examples. In real production usage the module consumer should
+  # supply a password securely; avoid generated passwords that get stored in terraform state.
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
     create = "60s"

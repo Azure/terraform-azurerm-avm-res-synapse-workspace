@@ -3,11 +3,6 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
-resource "random_password" "synapse_sql_admin_password" {
-  length  = 16
-  special = true
-}
-
 data "azurerm_client_config" "current" {}
 
 # Synapse module resource
@@ -25,10 +20,8 @@ resource "azurerm_synapse_workspace" "this" {
   public_network_access_enabled        = var.public_network_access_enabled
   purview_id                           = var.purview_id
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password = (
-    var.sql_administrator_login_password != "" ? var.sql_administrator_login_password :
-    (var.cmk_enabled && var.cmk_key_versionless_id != null ? null : random_password.synapse_sql_admin_password.result)
-  )
+  # The password must be supplied by the caller. If CMK is enabled and key id supplied then password is null.
+  sql_administrator_login_password = var.cmk_enabled && var.cmk_key_versionless_id != null ? null : var.sql_administrator_login_password
   sql_identity_control_enabled = var.sql_identity_control_enabled
   tags                         = var.tags
 
@@ -86,7 +79,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   count = var.cmk_enabled ? 1 : 0
 
   active                              = true
-  customer_managed_key_name           = var.cmk_key_name
+  customer_managed_key_name           = var.cmk_key_name != null ? var.cmk_key_name : "synk-${var.name}"
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = var.cmk_key_versionless_id
 

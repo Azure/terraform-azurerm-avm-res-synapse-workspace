@@ -77,7 +77,9 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = random_password.synapse_sql_admin_password.result
+  test_secret = var.synapse_sql_admin_password
+
+Note: This example also contains a generated `random_password.synapse_sql_admin_password` resource which is included to support automated testing in CI. It is NOT recommended for real deployments because the generated password will be stored in the Terraform state file. In production, supply the `synapse_sql_admin_password` via secure means (pipeline secrets, secret manager, environment variable, etc.).
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -236,8 +238,8 @@ Default: `false`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
-Description: This variable controls whether or not telemetry is enabled for the module.  
-For more information see <https://aka.ms/avm/telemetryinfo>.  
+Description: This variable controls whether or not telemetry is enabled for the module.
+For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
