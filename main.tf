@@ -24,8 +24,8 @@ resource "azurerm_synapse_workspace" "this" {
   sql_administrator_login              = var.sql_administrator_login
   # The password must be supplied by the caller. If CMK is enabled and key id supplied then password is null.
   sql_administrator_login_password = var.cmk_enabled && var.cmk_key_versionless_id != null ? null : var.sql_administrator_login_password
-  sql_identity_control_enabled = var.sql_identity_control_enabled
-  tags                         = var.tags
+  sql_identity_control_enabled     = var.sql_identity_control_enabled
+  tags                             = var.tags
 
   dynamic "azure_devops_repo" {
     for_each = var.azure_devops_repo != null ? [var.azure_devops_repo] : []
