@@ -4,16 +4,6 @@ variable "synapse_sql_admin_password" {
   sensitive   = true
 }
 
-variable "sql_administrator_login" {
-  description = "SQL administrator login name (user)."
-  type        = string
-  default     = "sqladmin"
-}# variable "storage_data_lake_gen2_filesystem_name" {
-#   type        = string
-#   description = "Specifies the name of storage data lake gen2 filesystem resource."
-#   default     = "adls_fs"
-# }
-
 variable "cmk_enabled" {
   type        = bool
   default     = false

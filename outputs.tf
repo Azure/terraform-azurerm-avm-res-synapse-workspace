@@ -5,7 +5,7 @@
 
 # Module owners should include the full resource via a 'resource' output
 # https://azure.github.io/Azure-Verified-Modules/specs/terraform/#id-tffr2---category-outputs---additional-terraform-outputs
-output "synapse_workspace_id" {
+output "resource_id" {
   description = "The resource ID of the Synapse Workspace."
   value       = azurerm_synapse_workspace.this.id
 }
