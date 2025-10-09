@@ -77,7 +77,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = random_password.synapse_sql_admin_password.result
+  test_secret = var.synapse_sql_admin_password
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -208,8 +208,8 @@ Default: `false`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
-Description: This variable controls whether or not telemetry is enabled for the module.  
-For more information see <https://aka.ms/avm/telemetryinfo>.  
+Description: This variable controls whether or not telemetry is enabled for the module.
+For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 
 Type: `bool`

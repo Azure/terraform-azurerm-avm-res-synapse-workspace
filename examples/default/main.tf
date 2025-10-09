@@ -36,6 +36,9 @@ data "http" "ip" {
   }
 }
 
+// NOTE: For automated testing purposes only, this example includes a generated random password.
+// In real usage, do NOT rely on the example generated password as it will end up in terraform state.
+// Module consumers should provide the password securely via variables, secret managers, or CI secrets.
 resource "random_password" "synapse_sql_admin_password" {
   length  = 16
   special = true
@@ -71,7 +74,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = random_password.synapse_sql_admin_password.result
+    test_secret = var.synapse_sql_admin_password
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
