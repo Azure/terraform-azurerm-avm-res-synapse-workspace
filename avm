@@ -1,18 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-# Create a temporary copy of this script to avoid self-modification issues
-if [ -z "$AVM_FORKED" ]; then
-  # Create temporary directory and file
-    TEMP_DIR=$(mktemp -d)
-    TEMP_FILE="$TEMP_DIR/avm_$(date +%s)_$RANDOM"
-    # Copy the current script to the temporary file
-    cp "$0" "$TEMP_FILE"
-    chmod +x "$TEMP_FILE"
-
-    export AVM_FORKED=1
-    # Use exec to fork to a new process and not return to the script
-    exec "$TEMP_FILE" "$@"
-fi
+set -e
 
 usage () {
   echo "Usage: avm <make target>"
@@ -38,26 +26,16 @@ CONTAINER_PULL_POLICY=${CONTAINER_PULL_POLICY:-"always"}
 AVM_MAKEFILE_REF=${AVM_MAKEFILE_REF:-"main"}
 AVM_PORCH_REF=${AVM_PORCH_REF:-"main"}
 
-
-if [ ! "$(command -v "$CONTAINER_RUNTIME")" ] && [ -z "$AVM_IN_CONTAINER" ]; then
-    echo "Error: $CONTAINER_RUNTIME is not installed. Please install $CONTAINER_RUNTIME first."
+if [ ! "$(command -v "${CONTAINER_RUNTIME}")" ] && [ -z "${AVM_IN_CONTAINER}" ]; then
+    echo "Error: ${CONTAINER_RUNTIME} is not installed. Please install ${CONTAINER_RUNTIME} first."
     exit 1
 fi
-
-AVM_IMAGE=${AVM_IMAGE:-mcr.microsoft.com/azterraform}
 
 if [ -z "$1" ]; then
     echo "Error: Please provide a make target. See https://github.com/Azure/avm-terraform-governance/blob/main/Makefile for available targets."
     echo
     usage
     exit 1
-fi
-
-# Set pull option based on AVM_NO_CONTAINER_PULL
-if [ -z "$AVM_NO_CONTAINER_PULL" ]; then
-  PULL_OPTION="--pull always"
-else
-  PULL_OPTION=""
 fi
 
 # Check if AZURE_CONFIG_DIR is set, if not, set it to ~/.azure
@@ -84,8 +62,34 @@ fi
 
 # Check if we are running in a container
 # If we are then just run make directly
-if [ -z "$AVM_IN_CONTAINER" ]; then
-  $CONTAINER_RUNTIME run $PULL_OPTION --user "$(id -u):$(id -g)" --rm -v "$(pwd)":/src -w /src -v $AZURE_CONFIG_DIR:/azureconfig -e AZURE_CONFIG_DIR=/azureconfig -e GITHUB_TOKEN -e GITHUB_REPOSITORY -e ARM_SUBSCRIPTION_ID -e ARM_TENANT_ID -e ARM_CLIENT_ID -e GITHUB_REPOSITORY_OWNER $AVM_IMAGE make "$1"
+if [ -z "${AVM_IN_CONTAINER}" ]; then
+  ${CONTAINER_RUNTIME} run \
+    --pull "${CONTAINER_PULL_POLICY}" \
+    --user "$(id -u):$(id -g)" \
+    --rm \
+    ${DOCKER_INTERACTIVE} \
+    -v "$(pwd)":/src \
+    ${AZURE_CONFIG_MOUNT:-} \
+    -e ARM_CLIENT_ID \
+    -e ARM_OIDC_REQUEST_TOKEN \
+    -e ARM_OIDC_REQUEST_URL \
+    -e ARM_SUBSCRIPTION_ID \
+    -e ARM_TENANT_ID \
+    -e ARM_USE_OIDC \
+    -e FORCE_COLOR \
+    -e GITHUB_TOKEN \
+    -e NO_COLOR \
+    -e PORCH_LOG_LEVEL \
+    -e TF_IN_AUTOMATION=1 \
+    --env-file <(env | grep '^TF_VAR_') \
+    --env-file <(env | grep '^AVM_') \
+    "${CONTAINER_IMAGE}" \
+    make \
+    TUI="${TUI}" \
+    AVM_MAKEFILE_REF="${AVM_MAKEFILE_REF}" \
+    "${PORCH_BASE_URL_MAKE_ADD}" \
+    AVM_PORCH_REF="${AVM_PORCH_REF}" \
+    "$1"
 else
   make TUI="${TUI}" AVM_MAKEFILE_REF="${AVM_MAKEFILE_REF}" ${PORCH_BASE_URL_MAKE_ADD} AVM_PORCH_REF="${AVM_PORCH_REF}" "$1"
 fi
