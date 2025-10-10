@@ -5,26 +5,6 @@
 This deploys the module in its simplest form.
 
 ```hcl
-terraform {
-  required_version = ">= 1.3.0"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-
-
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
@@ -192,8 +172,8 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
-module "test" {
-  source = "../../"
+module "synapse" {
+  source = "../.."
 
   location                             = azurerm_resource_group.this.location
   name                                 = "synapse-test-workspace-avm-01"

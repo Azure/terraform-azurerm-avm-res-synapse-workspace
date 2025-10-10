@@ -117,6 +117,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
 
 # This is the module call for Synapse Workspace
 # This module creates a Synapse Workspace with the specified parameters.
+# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
