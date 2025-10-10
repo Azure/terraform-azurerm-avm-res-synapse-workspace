@@ -22,7 +22,7 @@ variable "sql_administrator_login" {
 
 variable "synapse_sql_admin_password" {
   type        = string
-  default     = "example-password"
+  default     = null
   description = "The SQL administrator password for the Synapse workspace. Provided by the caller to avoid storing generated passwords in state."
   sensitive   = true
 }

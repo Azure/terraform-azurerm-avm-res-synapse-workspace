@@ -74,7 +74,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = var.synapse_sql_admin_password
+    test_secret = coalesce(var.synapse_sql_admin_password, random_password.synapse_sql_admin_password.result)
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
