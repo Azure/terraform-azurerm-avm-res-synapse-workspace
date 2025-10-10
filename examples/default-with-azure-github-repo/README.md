@@ -78,7 +78,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = var.synapse_sql_admin_password
+    test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
   }
   # The following random_password resource is included in the example modules to support
   # automated testing and examples. In real production usage the module consumer should
@@ -234,7 +234,7 @@ Description: The SQL administrator password for the Synapse workspace. Provided 
 
 Type: `string`
 
-Default: `"example-password"`
+Default: `null`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
