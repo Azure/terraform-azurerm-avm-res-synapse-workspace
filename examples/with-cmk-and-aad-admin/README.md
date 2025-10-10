@@ -208,14 +208,6 @@ Type: `string`
 
 Default: `"SQLAdmin"`
 
-### <a name="input_synapse_sql_admin_password"></a> [synapse\_sql\_admin\_password](#input\_synapse\_sql\_admin\_password)
-
-Description: The SQL administrator password for the Synapse workspace. Provided by the caller to avoid storing generated passwords in state.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: The map of tags to be applied to the resource
