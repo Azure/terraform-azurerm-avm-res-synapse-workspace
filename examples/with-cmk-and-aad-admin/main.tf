@@ -5,6 +5,8 @@ module "regions" {
   version = "0.5.2"
 }
 
+data "azurerm_client_config" "current" {}
+
 # This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
@@ -35,8 +37,6 @@ data "http" "ip" {
     min_delay_ms = 500
   }
 }
-
-data "azurerm_client_config" "current" {}
 
 # Creating Key vault to store sql admin secrets
 
