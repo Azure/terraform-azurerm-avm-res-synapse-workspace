@@ -3,6 +3,8 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "time_sleep" "wait_for_resources" {
   create_duration = "60s"
 }

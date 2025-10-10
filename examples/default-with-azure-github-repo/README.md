@@ -196,13 +196,7 @@ The following resources are used by this module:
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_synapse_sql_admin_password"></a> [synapse\_sql\_admin\_password](#input\_synapse\_sql\_admin\_password)
-
-Description: The SQL administrator password for the Synapse workspace. Provided by the caller to avoid storing generated passwords in state.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
@@ -233,6 +227,14 @@ Description: Specifies The login name of the SQL administrator. Changing this fo
 Type: `string`
 
 Default: `"SQLAdmin"`
+
+### <a name="input_synapse_sql_admin_password"></a> [synapse\_sql\_admin\_password](#input\_synapse\_sql\_admin\_password)
+
+Description: The SQL administrator password for the Synapse workspace. Provided by the caller to avoid storing generated passwords in state.
+
+Type: `string`
+
+Default: `"example-password"`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
