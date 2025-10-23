@@ -1,3 +1,29 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.28.0, < 5.0.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
@@ -123,17 +149,22 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  aad_admin_obj_id                     = data.azurerm_client_config.current.object_id # Object ID of the AAD admin
-  azuread_authentication_only          = true
-  cmk_enabled                          = var.cmk_enabled
-  cmk_key_name                         = "synapse-cmk-key" # Name of the customer managed key
-  cmk_key_versionless_id               = module.key_vault.keys.synapse_cmk_key.versionless_id
+  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id # Object ID of the Entra ID admin
+  entra_id_authentication_only_enabled = true
+  customer_managed_key = {
+    key_vault_resource_id  = module.key_vault.resource_id
+    key_name               = "synapse-cmk-key"
+    key_version            = null
+    user_assigned_identity = null
+  }
   enable_telemetry                     = var.enable_telemetry # see variables.tf
-  identity_type                        = "SystemAssigned"
+  managed_identities                   = {
+    system_assigned = true
+  }
   key_vault_id                         = module.key_vault.resource_id
   sql_administrator_login              = var.sql_administrator_login
   tags                                 = var.tags
-  use_access_policy                    = false
+  access_policy_enabled                = false
 
   depends_on = [
     module.key_vault,

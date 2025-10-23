@@ -1,3 +1,29 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.28.0, < 5.0.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
@@ -173,9 +199,11 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  cmk_enabled                          = var.cmk_enabled
+  customer_managed_key = null
   enable_telemetry                     = var.enable_telemetry
-  identity_type                        = "SystemAssigned"
+  managed_identities                   = {
+    system_assigned = true
+  }
   sql_administrator_login              = var.sql_administrator_login
   tags                                 = var.tags
 

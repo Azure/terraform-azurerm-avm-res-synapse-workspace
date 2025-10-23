@@ -10,7 +10,7 @@ resource "azurerm_key_vault_access_policy" "kv_policy" {
     "UnwrapKey"
   ]
 
-  depends_on = [azurerm_synapse_workspace.this, time_sleep.wait_for_resources]
+  depends_on = [time_sleep.wait_for_resources]
 }
 
 resource "azurerm_role_assignment" "kv_crypto_user" {
@@ -20,5 +20,5 @@ resource "azurerm_role_assignment" "kv_crypto_user" {
   scope                = var.key_vault_id
   role_definition_name = "Key Vault Crypto User"
 
-  depends_on = [azurerm_synapse_workspace.this, time_sleep.wait_for_resources]
+  depends_on = [time_sleep.wait_for_resources]
 }

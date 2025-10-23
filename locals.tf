@@ -1,19 +1,25 @@
-# TODO: insert locals here.
 locals {
-  # private_endpoint_application_security_group_associations = {
-  #   for assoc in flatten([
-  #     for pe_k, pe_v in var.private_endpoints : [
-  #       for asg_k, asg_v in try(pe_v.application_security_group_associations, {}) : {
-  #         asg_key         = asg_k
-  #         pe_key          = pe_k
-  #         asg_resource_id = asg_v
-  #       }
-  #     ]
-  #   ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc
-  # }
-  resource_group_location = coalesce(
-    var.location,
-    try(data.azurerm_resource_group.parent.location, null)
-  )
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
+  managed_identities = {
+    system_assigned_user_assigned = (
+      (try(var.managed_identities.system_assigned, false)) || length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0
+    ) ? {
+      this = {
+        type = (
+          try(var.managed_identities.system_assigned, false) && length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0
+        ) ? "SystemAssigned, UserAssigned" : length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0 ? "UserAssigned" : "SystemAssigned"
+        user_assigned_resource_ids = try(var.managed_identities.user_assigned_resource_ids, [])
+      }
+    } : {}
+    system_assigned = try(var.managed_identities.system_assigned, false) ? {
+      this = {
+        type = "SystemAssigned"
+      }
+    } : {}
+    user_assigned = length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0 ? {
+      this = {
+        type = "UserAssigned"
+        user_assigned_resource_ids = try(var.managed_identities.user_assigned_resource_ids, [])
+      }
+    } : {}
+  }
 }

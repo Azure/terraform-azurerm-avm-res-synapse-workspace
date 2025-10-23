@@ -1,3 +1,29 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.28.0, < 5.0.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
@@ -71,7 +97,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
+    test_secret = var.synapse_sql_admin_password
   }
   # The following random_password resource is included in the example modules to support
   # automated testing and examples. In real production usage the module consumer should
@@ -125,7 +151,6 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
 
 # This is the module call for Synapse Workspace
 # This module creates a Synapse Workspace with the specified parameters.
-# This module creates a Synapse Workspace with the specified parameters.
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
@@ -147,9 +172,11 @@ module "synapse" {
     last_commit_id  = "abc123def456"
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
-  cmk_enabled             = var.cmk_enabled
+  customer_managed_key = null
   enable_telemetry        = var.enable_telemetry # see variables.tf
-  identity_type           = "SystemAssigned"
+  managed_identities      = {
+    system_assigned = true
+  }
   sql_administrator_login = var.sql_administrator_login
   tags                    = var.tags
 
