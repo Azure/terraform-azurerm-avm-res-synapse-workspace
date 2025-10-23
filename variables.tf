@@ -26,12 +26,6 @@ variable "storage_data_lake_gen2_filesystem_id" {
   description = "Specifies the ID of storage data lake gen2 filesystem resource. Changing this forces a new resource to be created."
 }
 
-variable "access_policy_enabled" {
-  type        = bool
-  default     = false
-  description = "Whether to use access policy instead of RBAC role."
-}
-
 variable "azure_devops_repository" {
   type = object({
     account_name    = string

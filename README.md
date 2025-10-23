@@ -93,14 +93,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_access_policy_enabled"></a> [access\_policy\_enabled](#input\_access\_policy\_enabled)
-
-Description: Whether to use access policy instead of RBAC role.
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_azure_devops_repository"></a> [azure\_devops\_repository](#input\_azure\_devops\_repository)
 
 Description: Optional configuration for Azure DevOps repository integration.

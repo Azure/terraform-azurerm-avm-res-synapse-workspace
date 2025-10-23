@@ -88,7 +88,6 @@ module "key_vault" {
   name                = module.naming.key_vault.name_unique
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  enable_telemetry    = var.enable_telemetry
   keys = {
     synapse_cmk_key = {
       name     = "synapse-cmk-key"
@@ -170,7 +169,6 @@ module "synapse" {
     key_version            = null
     user_assigned_identity = null
   }
-  enable_telemetry                     = var.enable_telemetry                         # see variables.tf
   entra_id_admin_object_id             = data.azurerm_client_config.current.object_id # Object ID of the Entra ID admin
   entra_id_authentication_only_enabled = true
   key_vault_id                         = module.key_vault.resource_id
