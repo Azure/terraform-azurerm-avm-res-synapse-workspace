@@ -199,13 +199,13 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key = null
+  customer_managed_key                 = null
   enable_telemetry                     = var.enable_telemetry
-  managed_identities                   = {
+  managed_identities = {
     system_assigned = true
   }
-  sql_administrator_login              = var.sql_administrator_login
-  tags                                 = var.tags
+  sql_administrator_login = var.sql_administrator_login
+  tags                    = var.tags
 
   depends_on = [
     module.key_vault,

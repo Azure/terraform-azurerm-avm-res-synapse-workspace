@@ -173,8 +173,8 @@ module "synapse" {
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
   customer_managed_key = null
-  enable_telemetry        = var.enable_telemetry # see variables.tf
-  managed_identities      = {
+  enable_telemetry     = var.enable_telemetry # see variables.tf
+  managed_identities = {
     system_assigned = true
   }
   sql_administrator_login = var.sql_administrator_login

@@ -46,14 +46,12 @@ The following resources are used by this module:
 - [azurerm_role_assignment.kv_crypto_user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_synapse_workspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace) (resource)
-- [azurerm_synapse_workspace_aad_admin.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_aad_admin) (resource)
-- [azurerm_synapse_workspace_key.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_key) (resource)
+- [azurerm_synapse_workspace_aad_admin.admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_aad_admin) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_sleep.wait_for_resources](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
-- [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -95,15 +93,15 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_aad_admin_obj_id"></a> [aad\_admin\_obj\_id](#input\_aad\_admin\_obj\_id)
+### <a name="input_access_policy_enabled"></a> [access\_policy\_enabled](#input\_access\_policy\_enabled)
 
-Description: The Object ID of AAD group to be added as an admin
+Description: Whether to use access policy instead of RBAC role.
 
-Type: `string`
+Type: `bool`
 
-Default: `""`
+Default: `false`
 
-### <a name="input_azure_devops_repo"></a> [azure\_devops\_repo](#input\_azure\_devops\_repo)
+### <a name="input_azure_devops_repository"></a> [azure\_devops\_repository](#input\_azure\_devops\_repository)
 
 Description: Optional configuration for Azure DevOps repository integration.
 
@@ -118,7 +116,7 @@ Description: Optional configuration for Azure DevOps repository integration.
 Example Input:
 
 ```terraform
-azure_devops_repo = {
+azure_devops_repository = {
   account_name    = "mydevopsaccount"
   branch_name     = "main"
   project_name    = "MyProject"
@@ -144,51 +142,34 @@ object({
 
 Default: `null`
 
-### <a name="input_azuread_authentication_only"></a> [azuread\_authentication\_only](#input\_azuread\_authentication\_only)
-
-Description: Is Azure Active Directory Authentication the only way to authenticate with resources inside this synapse Workspace.
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_cmk_enabled"></a> [cmk\_enabled](#input\_cmk\_enabled)
-
-Description: Flag to enable the customer\_managed\_key block.
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_cmk_key_name"></a> [cmk\_key\_name](#input\_cmk\_key\_name)
-
-Description: An identifier for the key. Defaults to 'cmk' if not specified.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_cmk_key_versionless_id"></a> [cmk\_key\_versionless\_id](#input\_cmk\_key\_versionless\_id)
-
-Description: The Azure Key Vault Key Versionless ID to be used as the Customer Managed Key (CMK) for double encryption.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_cmk_user_assigned_identity_id"></a> [cmk\_user\_assigned\_identity\_id](#input\_cmk\_user\_assigned\_identity\_id)
-
-Description: The User Assigned Identity ID to be used for accessing the Customer Managed Key for encryption.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_compute_subnet_id"></a> [compute\_subnet\_id](#input\_compute\_subnet\_id)
 
 Description: The ID of the subnet to use for the compute resources. Changing this forces a new resource to be created.
 
 Type: `string`
+
+Default: `null`
+
+### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
+
+Description: Controls the Customer Managed Key configuration for this resource. The following properties can be specified:
+- `key_vault_resource_id` - (Required) The resource ID of the Key Vault containing the key.
+- `key_name` - (Required) The name of the key in the Key Vault.
+- `key_version` - (Optional) The version of the key. If not specified, the latest version will be used.
+- `user_assigned_identity` - (Optional) An object with `resource_id` for the User Assigned Managed Identity to access the key.
+
+Type:
+
+```hcl
+object({
+    key_vault_resource_id = string
+    key_name              = string
+    key_version           = optional(string, null)
+    user_assigned_identity = optional(object({
+      resource_id = string
+    }), null)
+  })
+```
 
 Default: `null`
 
@@ -210,7 +191,31 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_github_repo"></a> [github\_repo](#input\_github\_repo)
+### <a name="input_entra_id_admin_login"></a> [entra\_id\_admin\_login](#input\_entra\_id\_admin\_login)
+
+Description: The login name for the Synapse workspace Entra ID admin.
+
+Type: `string`
+
+Default: `"AzureAD Admin"`
+
+### <a name="input_entra_id_admin_object_id"></a> [entra\_id\_admin\_object\_id](#input\_entra\_id\_admin\_object\_id)
+
+Description: The Object ID of Entra ID group to be added as an admin
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_entra_id_authentication_only_enabled"></a> [entra\_id\_authentication\_only\_enabled](#input\_entra\_id\_authentication\_only\_enabled)
+
+Description: Is Entra ID Authentication the only way to authenticate with resources inside this synapse Workspace.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_github_repository"></a> [github\_repository](#input\_github\_repository)
 
 Description: Optional configuration for GitHub repository integration.
 
@@ -224,7 +229,7 @@ Description: Optional configuration for GitHub repository integration.
 Example Input:
 
 ```terraform
-github_repo = {
+github_repository = {
   account_name    = "myorganization"
   branch_name     = "main"
   repository_name = "synapse-workspace"
@@ -248,33 +253,9 @@ object({
 
 Default: `null`
 
-### <a name="input_identity_ids"></a> [identity\_ids](#input\_identity\_ids)
+### <a name="input_linking_allowed_for_entra_id_tenant_ids"></a> [linking\_allowed\_for\_entra\_id\_tenant\_ids](#input\_linking\_allowed\_for\_entra\_id\_tenant\_ids)
 
-Description: Specifies a list of User Assigned Managed Identity IDs to be assigned to this Synapse Workspace. This is required when type is set to UserAssigned or SystemAssigned, UserAssigned.
-
-Type: `list(string)`
-
-Default: `null`
-
-### <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type)
-
-Description: Specifies the type of Managed Service Identity that should be associated with this Synapse Workspace. Possible values: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned.
-
-Type: `string`
-
-Default: `"SystemAssigned"`
-
-### <a name="input_key_vault_id"></a> [key\_vault\_id](#input\_key\_vault\_id)
-
-Description: The ID of the Key Vault
-
-Type: `string`
-
-Default: `""`
-
-### <a name="input_linking_allowed_for_aad_tenant_ids"></a> [linking\_allowed\_for\_aad\_tenant\_ids](#input\_linking\_allowed\_for\_aad\_tenant\_ids)
-
-Description: A set of AAD tenant IDs that are allowed to link to this workspace. If not specified, all tenants are allowed.
+Description: A set of Entra ID tenant IDs that are allowed to link to this workspace. If not specified, all tenants are allowed.
 
 Type: `list(string)`
 
@@ -307,6 +288,23 @@ object({
 
 Default: `null`
 
+### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
+
+Description: Controls the Managed Identity configuration on this resource. The following properties can be specified:
+- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
+- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
+
+Type:
+
+```hcl
+object({
+    system_assigned            = optional(bool, false)
+    user_assigned_resource_ids = optional(set(string), [])
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_managed_resource_group_name"></a> [managed\_resource\_group\_name](#input\_managed\_resource\_group\_name)
 
 Description: Workspace managed resource group. Changing this forces a new resource to be created.
@@ -329,7 +327,7 @@ Description: Whether public network access is enabled for the workspace. Default
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ### <a name="input_purview_id"></a> [purview\_id](#input\_purview\_id)
 
@@ -412,17 +410,13 @@ Type: `map(string)`
 
 Default: `null`
 
-### <a name="input_use_access_policy"></a> [use\_access\_policy](#input\_use\_access\_policy)
-
-Description: Use access policy instead of RBAC role
-
-Type: `bool`
-
-Default: `false`
-
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_name"></a> [name](#output\_name)
+
+Description: The name of the Synapse Workspace.
 
 ### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
 
@@ -439,10 +433,6 @@ Description: The location/region of the Synapse Workspace.
 ### <a name="output_synapse_workspace_managed_resource_group_name"></a> [synapse\_workspace\_managed\_resource\_group\_name](#output\_synapse\_workspace\_managed\_resource\_group\_name)
 
 Description: The managed resource group name for the Synapse Workspace (if any).
-
-### <a name="output_synapse_workspace_name"></a> [synapse\_workspace\_name](#output\_synapse\_workspace\_name)
-
-Description: The name of the Synapse Workspace.
 
 ## Modules
 

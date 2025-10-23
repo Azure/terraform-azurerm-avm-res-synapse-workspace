@@ -149,22 +149,22 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id # Object ID of the Entra ID admin
-  entra_id_authentication_only_enabled = true
+  access_policy_enabled                = false
   customer_managed_key = {
     key_vault_resource_id  = module.key_vault.resource_id
     key_name               = "synapse-cmk-key"
     key_version            = null
     user_assigned_identity = null
   }
-  enable_telemetry                     = var.enable_telemetry # see variables.tf
-  managed_identities                   = {
+  enable_telemetry                     = var.enable_telemetry                         # see variables.tf
+  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id # Object ID of the Entra ID admin
+  entra_id_authentication_only_enabled = true
+  key_vault_id                         = module.key_vault.resource_id
+  managed_identities = {
     system_assigned = true
   }
-  key_vault_id                         = module.key_vault.resource_id
-  sql_administrator_login              = var.sql_administrator_login
-  tags                                 = var.tags
-  access_policy_enabled                = false
+  sql_administrator_login = var.sql_administrator_login
+  tags                    = var.tags
 
   depends_on = [
     module.key_vault,

@@ -1,4 +1,3 @@
-
 variable "sql_administrator_login" {
   type        = string
   default     = "SQLAdmin"

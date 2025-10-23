@@ -1,10 +1,3 @@
-
-variable "entra_id_admin_login" {
-  description = "The login name for the Synapse workspace Entra ID admin."
-  type        = string
-  default     = "AzureAD Admin"
-}
-
 variable "location" {
   type        = string
   description = "Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location."
@@ -33,10 +26,10 @@ variable "storage_data_lake_gen2_filesystem_id" {
   description = "Specifies the ID of storage data lake gen2 filesystem resource. Changing this forces a new resource to be created."
 }
 
-variable "entra_id_admin_object_id" {
-  type        = string
-  default     = ""
-  description = "The Object ID of Entra ID group to be added as an admin"
+variable "access_policy_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether to use access policy instead of RBAC role."
 }
 
 variable "azure_devops_repository" {
@@ -76,19 +69,18 @@ azure_devops_repository = {
 DESCRIPTION
 }
 
-variable "entra_id_authentication_only_enabled" {
-  type        = bool
-  default     = false
-  description = "Is Entra ID Authentication the only way to authenticate with resources inside this synapse Workspace."
+variable "compute_subnet_id" {
+  type        = string
+  default     = null
+  description = "The ID of the subnet to use for the compute resources. Changing this forces a new resource to be created."
 }
-
 
 # AVM-compliant Customer Managed Key interface
 variable "customer_managed_key" {
   type = object({
-    key_vault_resource_id  = string
-    key_name               = string
-    key_version            = optional(string, null)
+    key_vault_resource_id = string
+    key_name              = string
+    key_version           = optional(string, null)
     user_assigned_identity = optional(object({
       resource_id = string
     }), null)
@@ -101,12 +93,6 @@ Controls the Customer Managed Key configuration for this resource. The following
 - `key_version` - (Optional) The version of the key. If not specified, the latest version will be used.
 - `user_assigned_identity` - (Optional) An object with `resource_id` for the User Assigned Managed Identity to access the key.
 DESCRIPTION
-}
-
-variable "compute_subnet_id" {
-  type        = string
-  default     = null
-  description = "The ID of the subnet to use for the compute resources. Changing this forces a new resource to be created."
 }
 
 variable "data_exfiltration_protection_enabled" {
@@ -124,6 +110,24 @@ For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
   nullable    = false
+}
+
+variable "entra_id_admin_login" {
+  type        = string
+  default     = "AzureAD Admin"
+  description = "The login name for the Synapse workspace Entra ID admin."
+}
+
+variable "entra_id_admin_object_id" {
+  type        = string
+  default     = ""
+  description = "The Object ID of Entra ID group to be added as an admin"
+}
+
+variable "entra_id_authentication_only_enabled" {
+  type        = bool
+  default     = false
+  description = "Is Entra ID Authentication the only way to authenticate with resources inside this synapse Workspace."
 }
 
 variable "github_repository" {
@@ -160,21 +164,6 @@ github_repository = {
 DESCRIPTION
 }
 
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  nullable    = false
-  description = <<DESCRIPTION
-Controls the Managed Identity configuration on this resource. The following properties can be specified:
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
-DESCRIPTION
-}
-
-
 variable "linking_allowed_for_entra_id_tenant_ids" {
   type        = list(string)
   default     = []
@@ -207,6 +196,20 @@ DESCRIPTION
     condition     = var.lock != null ? contains(["CanNotDelete", "ReadOnly"], var.lock.kind) : true
     error_message = "Lock kind must be either `\"CanNotDelete\"` or `\"ReadOnly\"`."
   }
+}
+
+variable "managed_identities" {
+  type = object({
+    system_assigned            = optional(bool, false)
+    user_assigned_resource_ids = optional(set(string), [])
+  })
+  default     = {}
+  description = <<DESCRIPTION
+Controls the Managed Identity configuration on this resource. The following properties can be specified:
+- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
+- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
+DESCRIPTION
+  nullable    = false
 }
 
 variable "managed_resource_group_name" {
@@ -296,10 +299,4 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) A mapping of tags to assign to the Container App."
-}
-
-variable "access_policy_enabled" {
-  type        = bool
-  default     = false
-  description = "Whether to use access policy instead of RBAC role."
 }
