@@ -156,7 +156,7 @@ Type:
 ```hcl
 object({
     key_vault_resource_id = string
-    key_name              = optional(string, null)
+    key_name              = string
     key_version           = optional(string, null)
     user_assigned_identity = optional(object({
       resource_id = string
