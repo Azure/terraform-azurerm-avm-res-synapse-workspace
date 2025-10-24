@@ -50,7 +50,7 @@ module "naming" {
 }
 
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions_by_name["eastus2"]
+  location = "East US 2"
   name     = module.naming.resource_group.name_unique
 }
 

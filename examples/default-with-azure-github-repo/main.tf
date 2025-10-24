@@ -27,7 +27,7 @@ provider "azurerm" {
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.9.0" # use the latest published version
+  version = "0.9.0"   # use the latest published version
 }
 
 module "naming" {
@@ -38,7 +38,7 @@ module "naming" {
 }
 
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions_by_name["eastus2"]
+  location = "East US 2"
   name     = module.naming.resource_group.name_unique
 }
 
@@ -142,8 +142,8 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key                 = null
   customer_managed_key_enabled         = false
+  customer_managed_key                 = null
   github_repository = {
     account_name    = "github-user"
     branch_name     = "main"

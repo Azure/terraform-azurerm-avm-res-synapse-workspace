@@ -25,7 +25,7 @@ data "azurerm_client_config" "current" {}
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.9.0" # use the latest published version
+  version = "0.9.0"   # use the latest published version
 }
 
 module "naming" {
@@ -36,7 +36,7 @@ module "naming" {
 }
 
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions_by_name["eastus2"]
+  location = "East US 2"
   name     = module.naming.resource_group.name_unique
 }
 
