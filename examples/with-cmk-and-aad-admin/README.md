@@ -24,10 +24,6 @@ terraform {
       source  = "hashicorp/http"
       version = ">= 3.5.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.5.0"
-    }
   }
 }
 
@@ -159,8 +155,6 @@ The following requirements are needed by this module:
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.28.0, < 5.0.0)
 
 - <a name="requirement_http"></a> [http](#requirement\_http) (>= 3.5.0)
-
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0)
 
 ## Resources
 

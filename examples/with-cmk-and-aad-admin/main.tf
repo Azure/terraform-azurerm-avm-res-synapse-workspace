@@ -105,7 +105,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
 module "synapse" {
   source = "../.."
 
-  location = azurerm_resource_group.this.location
+  location                             = azurerm_resource_group.this.location
   name                                 = "synapse-cmk-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
