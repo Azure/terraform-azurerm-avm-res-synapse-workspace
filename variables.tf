@@ -87,6 +87,12 @@ Controls the Customer Managed Key configuration for this resource. The following
 DESCRIPTION
 }
 
+variable "customer_managed_key_enabled" {
+  type        = bool
+  default     = false
+  description = "Controls whether a customer managed key is enabled for the Synapse workspace. If true, the customer_managed_key object must be provided. If false, no customer managed key will be configured."
+}
+
 variable "data_exfiltration_protection_enabled" {
   type        = bool
   default     = false

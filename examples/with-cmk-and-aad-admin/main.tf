@@ -21,6 +21,8 @@ provider "azurerm" {
   }
 }
 
+data "azurerm_client_config" "current" {}
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.5.2"
@@ -124,11 +126,11 @@ module "synapse" {
   sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   customer_managed_key = {
-    key_vault_resource_id  = module.key_vault.resource_id
-    key_name               = "synapse-cmk-key"
-    key_version            = module.key_vault.keys["synapse_cmk_key"].version
-    user_assigned_identity = null
+    key_name                  = "synapse-cmk-key"
+    key_versionless_id        = module.key_vault.keys["synapse-cmk-key"].id
+    user_assigned_identity_id = null
   }
+  customer_managed_key_enabled         = true
   entra_id_admin_object_id             = data.azurerm_client_config.current.object_id
   entra_id_authentication_only_enabled = true
   managed_identities = {

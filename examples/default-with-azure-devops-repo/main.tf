@@ -154,7 +154,8 @@ module "synapse" {
     last_commit_id  = "abc123def456"
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
-  customer_managed_key = null
+  customer_managed_key         = null
+  customer_managed_key_enabled = false
   managed_identities = {
     system_assigned = true
   }

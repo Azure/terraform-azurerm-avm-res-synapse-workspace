@@ -165,6 +165,14 @@ object({
 
 Default: `null`
 
+### <a name="input_customer_managed_key_enabled"></a> [customer\_managed\_key\_enabled](#input\_customer\_managed\_key\_enabled)
+
+Description: Controls whether a customer managed key is enabled for the Synapse workspace. If true, the customer\_managed\_key object must be provided. If false, no customer managed key will be configured.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_data_exfiltration_protection_enabled"></a> [data\_exfiltration\_protection\_enabled](#input\_data\_exfiltration\_protection\_enabled)
 
 Description: Is data exfiltration protection enabled in this workspace? If set to true, managed\_virtual\_network\_enabled must also be set to true. Changing this forces a new resource to be created.

@@ -155,6 +155,7 @@ module "synapse" {
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   customer_managed_key                 = null
+  customer_managed_key_enabled         = false
   managed_identities = {
     system_assigned = true
   }

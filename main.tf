@@ -36,13 +36,12 @@ resource "azurerm_synapse_workspace" "this" {
     }
   }
   dynamic "customer_managed_key" {
-    for_each = var.customer_managed_key != null ? [var.customer_managed_key] : []
+    for_each = var.customer_managed_key_enabled ? [1] : []
 
     content {
-      key_name               = customer_managed_key.value.key_name
-      key_vault_resource_id  = customer_managed_key.value.key_vault_resource_id
-      key_version            = try(customer_managed_key.value.key_version, null)
-      user_assigned_identity = try(customer_managed_key.value.user_assigned_identity, null)
+      key_versionless_id        = var.customer_managed_key_key_versionless_id
+      key_name                  = try(var.customer_managed_key_key_name, null)
+      user_assigned_identity_id = try(var.customer_managed_key_user_assigned_identity_id, null)
     }
   }
   dynamic "github_repo" {
