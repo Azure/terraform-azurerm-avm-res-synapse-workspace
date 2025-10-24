@@ -67,7 +67,6 @@ resource "azurerm_synapse_workspace" "this" {
   }
 }
 
-# Removed: azurerm_synapse_workspace_key resource, as the AVM interface expects the customer_managed_key block to be handled directly in the main resource.
 
 resource "azurerm_synapse_workspace_aad_admin" "admin" {
   count = var.entra_id_admin_login != null && var.entra_id_admin_object_id != null ? 1 : 0

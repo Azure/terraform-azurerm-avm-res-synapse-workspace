@@ -24,21 +24,16 @@ provider "azurerm" {
     }
   }
 }
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.5.2"
 }
 
-# This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
-## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = "0.3.0"
@@ -46,13 +41,11 @@ module "naming" {
   unique-length = 7
 }
 
-# This is required for resource modules
 resource "azurerm_resource_group" "this" {
   location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
 }
 
-# Get current IP address for use in KV firewall rules
 data "http" "ip" {
   url = "https://api.ipify.org/"
   retry {
@@ -69,7 +62,6 @@ resource "random_password" "sql_admin_password" {
 
 data "azurerm_client_config" "current" {}
 
-# Creating Key vault to store sql admin secrets
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
@@ -98,9 +90,6 @@ module "key_vault" {
   secrets_value = {
     test_secret = var.synapse_sql_admin_password
   }
-  # The following random_password resource is included in the example modules to support
-  # automated testing and examples. In real production usage the module consumer should
-  # supply a password securely; avoid generated passwords that get stored in terraform state.
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
     create = "60s"
@@ -148,11 +137,6 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
   depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
-# This is the module call for Synapse Workspace
-# This module creates a Synapse Workspace with the specified parameters.
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
 module "synapse" {
   source = "../.."
 

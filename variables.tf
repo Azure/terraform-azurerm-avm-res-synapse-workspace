@@ -9,7 +9,6 @@ variable "name" {
   description = "The name of the this resource."
 }
 
-# This is required for most resource modules
 variable "resource_group_name" {
   type        = string
   description = "The resource group where the resources will be deployed."
@@ -69,7 +68,6 @@ variable "compute_subnet_id" {
   description = "The ID of the subnet to use for the compute resources. Changing this forces a new resource to be created."
 }
 
-# AVM-compliant Customer Managed Key interface
 variable "customer_managed_key" {
   type = object({
     key_vault_resource_id = string
@@ -288,7 +286,6 @@ variable "sql_identity_control_enabled" {
   description = "Are pipelines (running as workspace's system assigned identity) allowed to access SQL pools?"
 }
 
-# tflint-ignore: terraform_unused_declarations
 variable "tags" {
   type        = map(string)
   default     = null

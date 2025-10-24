@@ -50,7 +50,6 @@ locals {
 }
 
 locals {
-  # tflint-ignore: terraform_unused_declarations
   avm_azapi_header = join(" ", [for k, v in local.avm_azapi_headers : "${k}=${v}"])
 }
 data "azapi_client_config" "telemetry" {

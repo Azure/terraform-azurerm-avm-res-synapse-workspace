@@ -56,7 +56,6 @@ resource "azurerm_resource_group" "this" {
   name     = module.naming.resource_group.name_unique
 }
 
-# Get current IP address for use in KV firewall rules
 data "http" "ip" {
   url = "https://api.ipify.org/"
   retry {
@@ -73,7 +72,6 @@ resource "random_password" "sql_admin_password" {
 
 data "azurerm_client_config" "current" {}
 
-# Creating Key vault to store sql admin secrets
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
@@ -102,9 +100,6 @@ module "key_vault" {
   secrets_value = {
     test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
   }
-  # The following random_password resource is included in the example modules to support
-  # automated testing and examples. In real production usage the module consumer should
-  # supply a password securely; avoid generated passwords that get stored in terraform state.
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
     create = "60s"
@@ -153,12 +148,6 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
   depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
-# This is the module call for Synapse Workspace
-# This module creates a Synapse Workspace with the specified parameters.
-# This module creates a Synapse Workspace with the specified parameters.
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
 module "synapse" {
   source = "../.."
 

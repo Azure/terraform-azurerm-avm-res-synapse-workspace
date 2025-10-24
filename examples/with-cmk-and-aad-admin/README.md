@@ -38,34 +38,11 @@ provider "azurerm" {
     }
   }
 }
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
-module "synapse" {
-  source = "../.."
-  location                             = azurerm_resource_group.this.location
-  name                                 = "synapse-cmk-workspace-avm-01"
-  resource_group_name                  = azurerm_resource_group.this.name
-  sql_administrator_login_password     = null
-  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key = {
-    key_name               = "synapse-cmk-key"
-    key_versionless_id     = module.key_vault.keys["synapse-cmk-key"].id
-    user_assigned_identity_id = null
-  }
-  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id
-  entra_id_authentication_only_enabled = true
-  managed_identities = {
-    system_assigned = true
-  }
-  sql_administrator_login = var.sql_administrator_login
-  tags                    = var.tags
-}
 resource "azurerm_resource_group" "this" {
   location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
 }
 
-# Get current IP address for use in KV firewall rules
 data "http" "ip" {
   url = "https://api.ipify.org/"
   retry {
@@ -75,7 +52,6 @@ data "http" "ip" {
   }
 }
 
-# Creating Key vault to store sql admin secrets
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
@@ -144,17 +120,10 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
   depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
-# This is the module call for Synapse Workspace
-# This module creates a Synapse Workspace with the specified parameters.
-# This module creates a Synapse Workspace with the specified parameters.
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
 module "synapse" {
   source = "../.."
 
-  location = azurerm_resource_group.this.location
-  # source             = "Azure/avm-res-synapse-workspace/azurerm"
+  location                             = azurerm_resource_group.this.location
   name                                 = "synapse-cmk-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
@@ -165,7 +134,7 @@ module "synapse" {
     key_version            = null
     user_assigned_identity = null
   }
-  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id # Object ID of the Entra ID admin
+  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id
   entra_id_authentication_only_enabled = true
   managed_identities = {
     system_assigned = true
