@@ -39,7 +39,7 @@ resource "azurerm_synapse_workspace" "this" {
     for_each = var.customer_managed_key_enabled ? [1] : []
 
     content {
-      key_versionless_id        = try(var.customer_managed_key.key_versionless_id, null)
+      key_versionless_id        = local.customer_managed_key_versionless_id
       key_name                  = try(var.customer_managed_key.key_name, null)
       user_assigned_identity_id = try(var.customer_managed_key.user_assigned_identity.resource_id, null)
     }
@@ -72,7 +72,7 @@ resource "azurerm_synapse_workspace_key" "example" {
   active                              = true
   customer_managed_key_name           = var.customer_managed_key.key_name != null ? var.customer_managed_key.key_name : "synk-${var.name}"
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
-  customer_managed_key_versionless_id = var.customer_managed_key.key_versionless_id
+  customer_managed_key_versionless_id = local.customer_managed_key_versionless_id
 
   depends_on = [azurerm_key_vault_access_policy.kv_policy, azurerm_role_assignment.kv_crypto_user, time_sleep.wait_for_resources]
 }
