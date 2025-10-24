@@ -147,7 +147,6 @@ Default: `null`
 
 Description: Controls the Customer Managed Key configuration for this resource. The following properties can be specified:
 - `key_vault_resource_id` - (Required by AVM) The Azure resource ID of the Key Vault.
-- `key_versionless_id` - (Required by provider) The Azure Key Vault Key Versionless ID to be used as the Customer Managed Key (CMK) for double encryption (e.g. https://example-keyvault.vault.azure.net/keys/mykey). **This must be the Key Versionless ID, not the Key Vault resource ID.**
 - `key_name` - (Optional) An identifier for the key. Name needs to match the name of the key used with the azurerm\_synapse\_workspace\_key resource. Defaults to "cmk" if not specified.
 - `key_version` - (Optional) The version of the key. If not specified, the latest version will be used.
 - `user_assigned_identity` - (Optional) An object with `resource_id` for the User Assigned Managed Identity to access the key.
@@ -157,7 +156,6 @@ Type:
 ```hcl
 object({
     key_vault_resource_id = string
-    key_versionless_id    = string
     key_name              = optional(string, null)
     key_version           = optional(string, null)
     user_assigned_identity = optional(object({
