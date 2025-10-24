@@ -24,14 +24,10 @@ provider "azurerm" {
     }
   }
 }
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.0" # use the latest published version
-}
-
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
 }
 
 module "naming" {
@@ -55,7 +51,7 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
+resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
@@ -88,7 +84,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.synapse_sql_admin_password, random_password.synapse_sql_admin_password.result)
+    test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -104,7 +100,6 @@ data "azurerm_key_vault_secret" "sql_admin" {
 
   depends_on = [module.key_vault]
 }
-
 
 
 resource "azurerm_storage_account" "adls" {
@@ -124,13 +119,6 @@ resource "azurerm_storage_account" "adls" {
   depends_on = [azurerm_resource_group.this]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
-  name               = "synapseadlsfs"
-  storage_account_id = azurerm_storage_account.adls.id
-
-  depends_on = [azurerm_role_assignment.adls_blob_contributor]
-}
-
 resource "azurerm_role_assignment" "adls_blob_contributor" {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = azurerm_storage_account.adls.id
@@ -139,16 +127,31 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
   depends_on = [azurerm_storage_account.adls]
 }
 
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
+  name               = "synapseadlsfs"
+  storage_account_id = azurerm_storage_account.adls.id
+
+  depends_on = [azurerm_role_assignment.adls_blob_contributor]
+}
+
 module "synapse" {
   source = "../.."
 
-  location                             = azurerm_resource_group.this.location
-  name                                 = "synapse-test-workspace-avm-01"
+  location                             = module.regions.regions_by_display_name["East US 2"].name
+  name                                 = "synapse-testgit-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   customer_managed_key                 = null
   customer_managed_key_enabled         = false
+  github_repository = {
+    account_name    = "github-user"
+    branch_name     = "main"
+    repository_name = "synapse-repo"
+    root_folder     = "/AzureSynapse"
+    git_url         = "https://github.com/github-user/synapse-repo.git"
+    last_commit_id  = "abc123def456"
+  }
   managed_identities = {
     system_assigned = true
   }

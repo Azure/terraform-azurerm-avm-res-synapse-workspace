@@ -1,19 +1,40 @@
-# TODO: insert locals here.
 locals {
-  resource_group_location            = try(data.azurerm_resource_group.parent[0].location, null)
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-}
-
-# Private endpoint application security group associations
-# Remove if this resource does not support private endpoints
-locals {
-  private_endpoint_application_security_group_associations = { for assoc in flatten([
-    for pe_k, pe_v in var.private_endpoints : [
-      for asg_k, asg_v in pe_v.application_security_group_associations : {
-        asg_key         = asg_k
-        pe_key          = pe_k
-        asg_resource_id = asg_v
+  customer_managed_key_versionless_id = (
+    var.customer_managed_key != null ?
+    join(
+      "",
+      concat(
+        [
+          "https://",
+          regex("vaults/([a-zA-Z0-9-]+)", var.customer_managed_key.key_vault_resource_id)[0],
+          ".vault.azure.net/keys/",
+          var.customer_managed_key.key_name
+        ],
+        var.customer_managed_key.key_version != null ? ["/", var.customer_managed_key.key_version] : []
+      )
+    ) : null
+  )
+  managed_identities = {
+    system_assigned_user_assigned = (
+      (try(var.managed_identities.system_assigned, false)) || length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0
+      ) ? {
+      this = {
+        type = (
+          try(var.managed_identities.system_assigned, false) && length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0
+        ) ? "SystemAssigned, UserAssigned" : length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0 ? "UserAssigned" : "SystemAssigned"
+        user_assigned_resource_ids = try(var.managed_identities.user_assigned_resource_ids, [])
       }
-    ]
-  ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
+    } : {}
+    system_assigned = try(var.managed_identities.system_assigned, false) ? {
+      this = {
+        type = "SystemAssigned"
+      }
+    } : {}
+    user_assigned = length(try(var.managed_identities.user_assigned_resource_ids, [])) > 0 ? {
+      this = {
+        type                       = "UserAssigned"
+        user_assigned_resource_ids = try(var.managed_identities.user_assigned_resource_ids, [])
+      }
+    } : {}
+  }
 }

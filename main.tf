@@ -1,34 +1,109 @@
-# TODO: insert resources here.
-data "azurerm_resource_group" "parent" {
-  count = var.location == null ? 1 : 0
+data "azurerm_client_config" "current" {}
 
-  name = var.resource_group_name
+resource "time_sleep" "wait_for_resources" {
+  create_duration = "60s"
 }
 
-# TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
-resource "azurerm_resource_group" "TODO" {
-  location = coalesce(var.location, local.resource_group_location)
-  name     = var.name # calling code must supply the name
+resource "azurerm_synapse_workspace" "this" {
+  location                             = var.location
+  name                                 = var.name
+  resource_group_name                  = var.resource_group_name
+  storage_data_lake_gen2_filesystem_id = var.storage_data_lake_gen2_filesystem_id
+  azuread_authentication_only          = var.entra_id_authentication_only_enabled
+  compute_subnet_id                    = var.compute_subnet_id
+  data_exfiltration_protection_enabled = var.data_exfiltration_protection_enabled
+  linking_allowed_for_aad_tenant_ids   = var.linking_allowed_for_entra_id_tenant_ids
+  managed_resource_group_name          = var.managed_resource_group_name
+  managed_virtual_network_enabled      = var.managed_virtual_network_enabled
+  public_network_access_enabled        = var.public_network_access_enabled
+  purview_id                           = var.purview_id
+  sql_administrator_login              = var.sql_administrator_login
+  sql_administrator_login_password     = var.sql_administrator_login_password
+  sql_identity_control_enabled         = var.sql_identity_control_enabled
+  tags                                 = var.tags
+
+  dynamic "azure_devops_repo" {
+    for_each = var.azure_devops_repository != null ? [var.azure_devops_repository] : []
+
+    content {
+      account_name    = azure_devops_repository.value.account_name
+      branch_name     = azure_devops_repository.value.branch_name
+      project_name    = azure_devops_repository.value.project_name
+      repository_name = azure_devops_repository.value.repository_name
+      root_folder     = azure_devops_repository.value.root_folder
+      last_commit_id  = azure_devops_repository.value.last_commit_id
+      tenant_id       = azure_devops_repository.value.tenant_id
+    }
+  }
+  dynamic "customer_managed_key" {
+    for_each = var.customer_managed_key_enabled ? [1] : []
+
+    content {
+      key_versionless_id        = local.customer_managed_key_versionless_id
+      key_name                  = try(var.customer_managed_key.key_name, null)
+      user_assigned_identity_id = try(var.customer_managed_key.user_assigned_identity.resource_id, null)
+    }
+  }
+  dynamic "github_repo" {
+    for_each = var.github_repository != null ? [var.github_repository] : []
+
+    content {
+      account_name    = github_repository.value.account_name
+      branch_name     = github_repository.value.branch_name
+      repository_name = github_repository.value.repository_name
+      root_folder     = github_repository.value.root_folder
+      git_url         = github_repository.value.git_url
+      last_commit_id  = github_repository.value.last_commit_id
+    }
+  }
+  dynamic "identity" {
+    for_each = local.managed_identities.system_assigned_user_assigned
+
+    content {
+      type         = identity.value.type
+      identity_ids = identity.value.user_assigned_resource_ids
+    }
+  }
 }
 
-# required AVM resources interfaces
+resource "azurerm_synapse_workspace_key" "example" {
+  count = var.customer_managed_key_enabled ? 1 : 0
+
+  active                              = true
+  customer_managed_key_name           = var.customer_managed_key.key_name != null ? var.customer_managed_key.key_name : "synk-${var.name}"
+  synapse_workspace_id                = azurerm_synapse_workspace.this.id
+  customer_managed_key_versionless_id = local.customer_managed_key_versionless_id
+
+  depends_on = [azurerm_key_vault_access_policy.kv_policy, azurerm_role_assignment.kv_crypto_user, time_sleep.wait_for_resources]
+}
+
+
+resource "azurerm_synapse_workspace_aad_admin" "admin" {
+  count = var.entra_id_admin_login != null && var.entra_id_admin_object_id != null ? 1 : 0
+
+  login                = var.entra_id_admin_login
+  object_id            = var.entra_id_admin_object_id
+  synapse_workspace_id = azurerm_synapse_workspace.this.id
+  tenant_id            = data.azurerm_client_config.current.tenant_id
+}
+
 resource "azurerm_management_lock" "this" {
-  count = var.lock.kind != "None" ? 1 : 0
+  count = var.lock != null ? 1 : 0
 
   lock_level = var.lock.kind
-  name       = coalesce(var.lock.name, "lock-${var.name}")
-  scope      = azurerm_resource_group.TODO.id # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
+  name       = coalesce(var.lock.name, "lock-${var.lock.kind}")
+  scope      = azurerm_synapse_workspace.this.id
+  notes      = var.lock.kind == "CanNotDelete" ? "Cannot delete the resource or its child resources." : "Cannot delete or modify the resource or its child resources."
 }
 
 resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 
   principal_id                           = each.value.principal_id
-  scope                                  = azurerm_resource_group.TODO.id # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
+  scope                                  = azurerm_synapse_workspace.this.id
   condition                              = each.value.condition
   condition_version                      = each.value.condition_version
   delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
-  role_definition_id                     = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_resource_substring)) ? each.value.role_definition_id_or_name : null
-  role_definition_name                   = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_resource_substring)) ? null : each.value.role_definition_id_or_name
-  skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
+  role_definition_id                     = strcontains(lower(each.value.role_definition_id_or_name), "/providers/microsoft.authorization/roledefinitions") ? each.value.role_definition_id_or_name : null
+  role_definition_name                   = strcontains(lower(each.value.role_definition_id_or_name), "/providers/microsoft.authorization/roledefinitions") ? null : each.value.role_definition_id_or_name
 }
