@@ -154,11 +154,7 @@ module "synapse" {
     last_commit_id  = "abc123def456"
     tenant_id       = "00000000-0000-0000-0000-000000000000"
   }
-  customer_managed_key = {
-    key_name                  = "synapse-cmk-key"
-    key_versionless_id        = module.key_vault.keys["synapse-cmk-key"].id
-    user_assigned_identity_id = null
-  }
+  customer_managed_key = null
   managed_identities = {
     system_assigned = true
   }

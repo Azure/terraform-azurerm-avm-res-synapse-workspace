@@ -20,6 +20,19 @@ provider "azurerm" {
     }
   }
 }
+
+module "regions" {
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "0.5.2"
+}
+
+module "naming" {
+  source  = "Azure/naming/azurerm"
+  version = "0.3.0"
+
+  unique-length = 7
+}
+
 resource "azurerm_resource_group" "this" {
   location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
@@ -113,7 +126,7 @@ module "synapse" {
   customer_managed_key = {
     key_vault_resource_id  = module.key_vault.resource_id
     key_name               = "synapse-cmk-key"
-    key_version            = null
+    key_version            = module.key_vault.keys["synapse_cmk_key"].version
     user_assigned_identity = null
   }
   entra_id_admin_object_id             = data.azurerm_client_config.current.object_id

@@ -154,11 +154,7 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key = {
-    key_name                  = "synapse-cmk-key"
-    key_versionless_id        = module.key_vault.keys["synapse-cmk-key"].id
-    user_assigned_identity_id = null
-  }
+  customer_managed_key                 = null
   managed_identities = {
     system_assigned = true
   }
