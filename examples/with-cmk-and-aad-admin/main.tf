@@ -25,7 +25,7 @@ data "azurerm_client_config" "current" {}
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.9.0"   # use the latest published version
+  version = "0.9.0" # use the latest published version
 }
 
 module "naming" {
