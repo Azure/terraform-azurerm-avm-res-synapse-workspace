@@ -26,31 +26,28 @@ provider "azurerm" {
 }
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.5.2"
+module "synapse" {
+  source = "../.."
+  location                             = azurerm_resource_group.this.location
+  name                                 = "synapse-cmk-workspace-avm-01"
+  resource_group_name                  = azurerm_resource_group.this.name
+  sql_administrator_login_password     = null
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
+  customer_managed_key = {
+    key_name               = "synapse-cmk-key"
+    key_versionless_id     = module.key_vault.keys["synapse-cmk-key"].id
+    user_assigned_identity_id = null
+  }
+  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id
+  entra_id_authentication_only_enabled = true
+  managed_identities = {
+    system_assigned = true
+  }
+  sql_administrator_login = var.sql_administrator_login
+  tags                    = var.tags
 }
-
-data "azurerm_client_config" "current" {}
-
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
-
-# This ensures we have unique CAF compliant names for our resources.
-module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.3.0"
-
-  unique-length = 7
-}
-
-# This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = "East US 2"
+  location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
 }
 

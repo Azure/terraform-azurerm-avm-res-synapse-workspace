@@ -38,21 +38,12 @@ provider "azurerm" {
     }
   }
 }
-## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.5.2"
 }
 
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
-
-# This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = "0.3.0"
@@ -60,9 +51,8 @@ module "naming" {
   unique-length = 7
 }
 
-# This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = "East US 2"
+  location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
 }
 
@@ -172,8 +162,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
 module "synapse" {
   source = "../.."
 
-  location = azurerm_resource_group.this.location
-  # source             = "Azure/avm-res-synapse-workspace/azurerm"
+  location                             = module.regions.regions_by_display_name["East US 2"].name
   name                                 = "synapse-testgit-workspace-avm-01"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
@@ -221,7 +210,6 @@ The following resources are used by this module:
 - [azurerm_role_assignment.adls_blob_contributor](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_storage_account.adls](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) (resource)
 - [azurerm_storage_data_lake_gen2_filesystem.adls_fs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem) (resource)
-- [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_password.sql_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_key_vault_secret.sql_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) (data source)

@@ -40,31 +40,28 @@ provider "azurerm" {
 }
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.5.2"
+module "synapse" {
+  source = "../.."
+  location                             = azurerm_resource_group.this.location
+  name                                 = "synapse-cmk-workspace-avm-01"
+  resource_group_name                  = azurerm_resource_group.this.name
+  sql_administrator_login_password     = null
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
+  customer_managed_key = {
+    key_name               = "synapse-cmk-key"
+    key_versionless_id     = module.key_vault.keys["synapse-cmk-key"].id
+    user_assigned_identity_id = null
+  }
+  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id
+  entra_id_authentication_only_enabled = true
+  managed_identities = {
+    system_assigned = true
+  }
+  sql_administrator_login = var.sql_administrator_login
+  tags                    = var.tags
 }
-
-data "azurerm_client_config" "current" {}
-
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
-
-# This ensures we have unique CAF compliant names for our resources.
-module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.3.0"
-
-  unique-length = 7
-}
-
-# This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = "East US 2"
+  location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
 }
 
@@ -204,8 +201,6 @@ The following resources are used by this module:
 - [azurerm_role_assignment.adls_blob_contributor](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_storage_account.adls](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) (resource)
 - [azurerm_storage_data_lake_gen2_filesystem.adls_fs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem) (resource)
-- [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
-- [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [http_http.ip](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -246,18 +241,6 @@ The following Modules are called:
 Source: Azure/avm-res-keyvault-vault/azurerm
 
 Version: 0.10.0
-
-### <a name="module_naming"></a> [naming](#module\_naming)
-
-Source: Azure/naming/azurerm
-
-Version: 0.3.0
-
-### <a name="module_regions"></a> [regions](#module\_regions)
-
-Source: Azure/avm-utl-regions/azurerm
-
-Version: 0.5.2
 
 ### <a name="module_synapse"></a> [synapse](#module\_synapse)
 

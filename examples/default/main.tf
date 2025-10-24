@@ -48,7 +48,7 @@ module "naming" {
 
 # This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = "East US 2"
+  location = module.regions.regions_by_display_name["East US 2"].name
   name     = module.naming.resource_group.name_unique
 }
 
@@ -198,7 +198,11 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key                 = null
+  customer_managed_key = {
+    key_name                  = "synapse-cmk-key"
+    key_versionless_id        = module.key_vault.keys["synapse-cmk-key"].id
+    user_assigned_identity_id = null
+  }
   managed_identities = {
     system_assigned = true
   }
