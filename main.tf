@@ -18,7 +18,7 @@ resource "azurerm_synapse_workspace" "this" {
   public_network_access_enabled        = var.public_network_access_enabled
   purview_id                           = var.purview_id
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = var.customer_managed_key_enabled && var.customer_managed_key_versionless_id != null ? null : var.sql_administrator_login_password
+  sql_administrator_login_password     = var.sql_administrator_login_password
   sql_identity_control_enabled         = var.sql_identity_control_enabled
   tags                                 = var.tags
 
@@ -70,14 +70,12 @@ resource "azurerm_synapse_workspace" "this" {
 # Removed: azurerm_synapse_workspace_key resource, as the AVM interface expects the customer_managed_key block to be handled directly in the main resource.
 
 resource "azurerm_synapse_workspace_aad_admin" "admin" {
-  count = var.customer_managed_key_enabled ? 1 : 0
+  count = var.entra_id_admin_login != null && var.entra_id_admin_object_id != null ? 1 : 0
 
   login                = var.entra_id_admin_login
   object_id            = var.entra_id_admin_object_id
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   tenant_id            = data.azurerm_client_config.current.tenant_id
-
-  depends_on = [azurerm_synapse_workspace_key.customer_managed_key]
 }
 
 resource "azurerm_management_lock" "this" {
@@ -99,5 +97,4 @@ resource "azurerm_role_assignment" "this" {
   delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
   role_definition_id                     = strcontains(lower(each.value.role_definition_id_or_name), "/providers/microsoft.authorization/roledefinitions") ? each.value.role_definition_id_or_name : null
   role_definition_name                   = strcontains(lower(each.value.role_definition_id_or_name), "/providers/microsoft.authorization/roledefinitions") ? null : each.value.role_definition_id_or_name
-  skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
 }
