@@ -33,7 +33,7 @@ provider "azurerm" {
 }
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.5.2"
+  version = "0.9.0" # use the latest published version
 }
 
 resource "random_integer" "region_index" {
@@ -49,7 +49,7 @@ module "naming" {
 }
 
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions_by_display_name["East US 2"].name
+  location = module.regions.regions_by_name["eastus2"]
   name     = module.naming.resource_group.name_unique
 }
 
@@ -253,7 +253,7 @@ Version: 0.3.0
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.5.2
+Version: 0.9.0
 
 ### <a name="module_synapse"></a> [synapse](#module\_synapse)
 
