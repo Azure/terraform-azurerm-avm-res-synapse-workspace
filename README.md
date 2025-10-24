@@ -411,6 +411,14 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_use_access_policy"></a> [use\_access\_policy](#input\_use\_access\_policy)
+
+Description: Controls whether to use Key Vault access policy for customer managed key permissions. If false, role assignment will be used.
+
+Type: `bool`
+
+Default: `false`
+
 ## Outputs
 
 The following outputs are exported:

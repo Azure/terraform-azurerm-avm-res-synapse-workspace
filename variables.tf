@@ -297,3 +297,9 @@ variable "tags" {
   default     = null
   description = "(Optional) A mapping of tags to assign to the Container App."
 }
+
+variable "use_access_policy" {
+  type        = bool
+  default     = false
+  description = "Controls whether to use Key Vault access policy for customer managed key permissions. If false, role assignment will be used."
+}
