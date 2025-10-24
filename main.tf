@@ -39,9 +39,10 @@ resource "azurerm_synapse_workspace" "this" {
     for_each = var.customer_managed_key_enabled ? [1] : []
 
     content {
-      key_versionless_id        = var.customer_managed_key_key_versionless_id
-      key_name                  = try(var.customer_managed_key_key_name, null)
-      user_assigned_identity_id = try(var.customer_managed_key_user_assigned_identity_id, null)
+      key_versionless_id        = try(var.customer_managed_key.key_vault_resource_id, null)
+      key_name                  = try(var.customer_managed_key.key_name, null)
+      key_version               = try(var.customer_managed_key.key_version, null)
+      user_assigned_identity_id = try(var.customer_managed_key.user_assigned_identity.resource_id, null)
     }
   }
   dynamic "github_repo" {
