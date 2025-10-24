@@ -146,18 +146,16 @@ Default: `null`
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
 Description: Controls the Customer Managed Key configuration for this resource. The following properties can be specified:
-- `key_vault_resource_id` - (Required) The resource ID of the Key Vault containing the key.
-- `key_name` - (Required) The name of the key in the Key Vault.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version will be used.
+- `key_name` - (Optional) The name of the key in the Key Vault.
+- `key_versionless_id` - (Required) The version of the key. If not specified, the latest version will be used.
 - `user_assigned_identity` - (Optional) An object with `resource_id` for the User Assigned Managed Identity to access the key.
 
 Type:
 
 ```hcl
 object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
+    key_name           = optional(string, null)
+    key_versionless_id = string
     user_assigned_identity = optional(object({
       resource_id = string
     }), null)
