@@ -22,10 +22,6 @@ resource "modtm_telemetry" "telemetry" {
 }
 
 locals {
-  fork_avm = !anytrue([for r in local.valid_module_source_regex : can(regex(r, one(data.modtm_module_source.telemetry).module_source))])
-}
-
-locals {
   valid_module_source_regex = [
     "registry.terraform.io/[A|a]zure/.+",
     "registry.opentofu.io/[A|a]zure/.+",
