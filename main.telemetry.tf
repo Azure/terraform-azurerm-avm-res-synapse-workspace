@@ -42,18 +42,3 @@ data "azapi_client_config" "telemetry" {
   count = var.enable_telemetry ? 1 : 0
 }
 
-locals {
-  avm_azapi_headers = !var.enable_telemetry ? {} : (local.fork_avm ? {
-    fork_avm  = "true"
-    random_id = one(random_uuid.telemetry).result
-    } : {
-    avm                = "true"
-    random_id          = one(random_uuid.telemetry).result
-    avm_module_source  = one(data.modtm_module_source.telemetry).module_source
-    avm_module_version = one(data.modtm_module_source.telemetry).module_version
-  })
-}
-
-locals {
-  avm_azapi_header = join(" ", [for k, v in local.avm_azapi_headers : "${k}=${v}"])
-}
