@@ -70,10 +70,11 @@ resource "azurerm_synapse_workspace_key" "example" {
   synapse_workspace_id                = azurerm_synapse_workspace.this.id
   customer_managed_key_versionless_id = local.customer_managed_key_versionless_id
 
-  depends_on = concat(
-    [azurerm_key_vault_access_policy.kv_policy, azurerm_role_assignment.kv_crypto_user],
-    time_sleep.key_vault_access_policy[*].id
-  )
+  depends_on = [
+    azurerm_key_vault_access_policy.kv_policy,
+    azurerm_role_assignment.kv_crypto_user,
+    time_sleep.key_vault_access_policy
+  ]
 }
 
 

@@ -155,6 +155,13 @@ if (-not $env:AVM_IN_CONTAINER) {
     $dockerArgs += @("-e", "$($_.Name)=$($_.Value)")
   }
 
+  # Forward AVM_BARE_* environment variables to the container with the prefix stripped
+  Get-ChildItem env: | Where-Object { $_.Name -like "AVM_BARE_*" } | ForEach-Object {
+    $strippedName = $_.Name -replace '^AVM_BARE_', ''
+    $dockerArgs += @("-e", "$strippedName=$($_.Value)")
+    Write-Host "Forwarding AVM bare variable to container as: $strippedName"
+  }
+
   # Add local environment variables from avm.config.json
   if (Test-Path "avm.config.json") {
     $jsonContent = Get-Content "avm.config.json" -Raw | ConvertFrom-Json -AsHashtable

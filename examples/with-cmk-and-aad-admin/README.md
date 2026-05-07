@@ -39,7 +39,7 @@ data "azurerm_client_config" "current" {}
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.9.0" # use the latest published version
+  version = "0.9.0"
 }
 
 module "naming" {
@@ -145,9 +145,10 @@ module "synapse" {
     key_version            = null
     user_assigned_identity = null
   }
-  customer_managed_key_enabled         = true
-  entra_id_admin_object_id             = data.azurerm_client_config.current.object_id
-  entra_id_authentication_only_enabled = true
+  customer_managed_key_enabled          = true
+  entra_id_admin_object_id              = data.azurerm_client_config.current.object_id
+  entra_id_authentication_only_enabled  = true
+  key_vault_access_policy_wait_duration = var.key_vault_access_policy_wait_duration
   managed_identities = {
     system_assigned = true
   }
@@ -191,6 +192,14 @@ No required inputs.
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_key_vault_access_policy_wait_duration"></a> [key\_vault\_access\_policy\_wait\_duration](#input\_key\_vault\_access\_policy\_wait\_duration)
+
+Description: Duration to wait for Key Vault access policy propagation. Set to '0s' to disable waiting. Useful for handling eventual consistency issues with permission propagation. Change to '0s' if you do not need the delay.
+
+Type: `string`
+
+Default: `"30s"`
 
 ### <a name="input_sql_administrator_login"></a> [sql\_administrator\_login](#input\_sql\_administrator\_login)
 

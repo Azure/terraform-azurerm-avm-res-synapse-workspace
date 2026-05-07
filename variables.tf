@@ -162,6 +162,18 @@ github_repository = {
 DESCRIPTION
 }
 
+variable "key_vault_access_policy_wait_duration" {
+  type        = string
+  default     = "0s"
+  description = "Duration to wait for Key Vault access policy propagation. Set to a non-zero value (e.g., '30s' or '60s') if deployments fail due to permission propagation delays. By default, no wait is applied to avoid unnecessary delays in day-2 operations."
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^(0s|[1-9]\\d*(ms|s|m))$", var.key_vault_access_policy_wait_duration))
+    error_message = "The duration must be a valid Go duration string (e.g., '30s', '1m', '100ms') or '0s'."
+  }
+}
+
 variable "linking_allowed_for_entra_id_tenant_ids" {
   type        = list(string)
   default     = []
@@ -302,16 +314,4 @@ variable "use_access_policy" {
   type        = bool
   default     = false
   description = "Controls whether to use Key Vault access policy for customer managed key permissions. If false, role assignment will be used."
-}
-
-variable "key_vault_access_policy_wait_duration" {
-  type        = string
-  default     = "0s"
-  description = "Duration to wait for Key Vault access policy propagation. Set to a non-zero value (e.g., '30s' or '60s') if deployments fail due to permission propagation delays. By default, no wait is applied to avoid unnecessary delays in day-2 operations."
-  nullable    = false
-
-  validation {
-    condition     = can(regex("^(0s|[1-9]\\d*(ms|s|m))$", var.key_vault_access_policy_wait_duration))
-    error_message = "The duration must be a valid Go duration string (e.g., '30s', '1m', '100ms') or '0s'."
-  }
 }

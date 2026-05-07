@@ -12,9 +12,9 @@ resource "azurerm_key_vault_access_policy" "kv_policy" {
 }
 
 resource "time_sleep" "key_vault_access_policy" {
-  count           = var.customer_managed_key_enabled && var.key_vault_access_policy_wait_duration != "0s" ? 1 : 0
-  create_duration = var.key_vault_access_policy_wait_duration
+  count = var.customer_managed_key_enabled && var.key_vault_access_policy_wait_duration != "0s" ? 1 : 0
 
+  create_duration = var.key_vault_access_policy_wait_duration
   triggers = {
     key_vault_access_policy_id = try(azurerm_key_vault_access_policy.kv_policy[0].id, null)
     role_assignment_id         = try(azurerm_role_assignment.kv_crypto_user[0].id, null)

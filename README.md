@@ -50,7 +50,7 @@ The following resources are used by this module:
 - [azurerm_synapse_workspace_key.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/synapse_workspace_key) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
-- [time_sleep.wait_for_resources](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
+- [time_sleep.key_vault_access_policy](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
@@ -254,6 +254,14 @@ object({
 
 Default: `null`
 
+### <a name="input_key_vault_access_policy_wait_duration"></a> [key\_vault\_access\_policy\_wait\_duration](#input\_key\_vault\_access\_policy\_wait\_duration)
+
+Description: Duration to wait for Key Vault access policy propagation. Set to a non-zero value (e.g., '30s' or '60s') if deployments fail due to permission propagation delays. By default, no wait is applied to avoid unnecessary delays in day-2 operations.
+
+Type: `string`
+
+Default: `"0s"`
+
 ### <a name="input_linking_allowed_for_entra_id_tenant_ids"></a> [linking\_allowed\_for\_entra\_id\_tenant\_ids](#input\_linking\_allowed\_for\_entra\_id\_tenant\_ids)
 
 Description: A set of Entra ID tenant IDs that are allowed to link to this workspace. If not specified, all tenants are allowed.
@@ -345,13 +353,13 @@ Description: A map of role assignments to create on the Synapse Workspace. The m
 - `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
 - `principal_id` - The ID of the principal to assign the role to.
 - `description` - (Optional) The description of the role assignment.
-- `skip_service_principal_aad_check` - (Optional) If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
+- `skip_service_principal_entra_id_check` - (Optional) If set to true, skips the Entra ID check for the service principal in the tenant. Defaults to false.
 - `condition` - (Optional) The condition which will be used to scope the role assignment.
 - `condition_version` - (Optional) The version of the condition syntax. Leave as `null` if you are not using a condition, if you are then valid values are '2.0'.
 - `delegated_managed_identity_resource_id` - (Optional) The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created. This field is only used in cross-tenant scenario.
 - `principal_type` - (Optional) The type of the `principal_id`. Possible values are `User`, `Group` and `ServicePrincipal`. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
 
-> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
+> Note: only set `skip_service_principal_entra_id_check` to true if you are assigning a role to a service principal.
 
 Example Input:
 
@@ -377,7 +385,7 @@ map(object({
     role_definition_id_or_name             = string
     principal_id                           = string
     description                            = optional(string, null)
-    skip_service_principal_aad_check       = optional(bool, false)
+    skip_service_principal_entra_id_check  = optional(bool, false)
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
