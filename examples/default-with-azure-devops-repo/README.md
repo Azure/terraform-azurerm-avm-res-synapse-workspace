@@ -95,7 +95,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = var.synapse_sql_admin_password
+    test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -152,7 +152,7 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  azure_devops_repo = {
+  azure_devops_repository = {
     account_name    = "devops-account"
     branch_name     = "main"
     project_name    = "synapse-project"
