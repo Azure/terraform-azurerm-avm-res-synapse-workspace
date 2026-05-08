@@ -92,6 +92,8 @@ resource "azurerm_synapse_workspace_aad_admin" "admin" {
   object_id            = var.entra_id_admin_object_id
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   tenant_id            = data.azurerm_client_config.current.tenant_id
+
+  depends_on = [azurerm_synapse_workspace_key.example]
 }
 
 resource "azurerm_management_lock" "this" {
