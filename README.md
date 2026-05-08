@@ -332,11 +332,11 @@ Default: `false`
 
 ### <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled)
 
-Description: Whether public network access is enabled for the workspace. Defaults to true.
+Description: Whether public network access is enabled for the workspace. Set to false only when managed\_virtual\_network\_enabled is true.
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_purview_id"></a> [purview\_id](#input\_purview\_id)
 

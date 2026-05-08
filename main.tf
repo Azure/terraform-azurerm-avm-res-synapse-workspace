@@ -60,6 +60,13 @@ resource "azurerm_synapse_workspace" "this" {
       identity_ids = identity.value.user_assigned_resource_ids
     }
   }
+
+  lifecycle {
+    precondition {
+      condition     = var.public_network_access_enabled || var.managed_virtual_network_enabled
+      error_message = "public_network_access_enabled can be false only when managed_virtual_network_enabled is true, per Synapse API validation."
+    }
+  }
 }
 
 resource "azurerm_synapse_workspace_key" "example" {

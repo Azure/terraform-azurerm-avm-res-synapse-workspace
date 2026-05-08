@@ -236,8 +236,8 @@ variable "managed_virtual_network_enabled" {
 
 variable "public_network_access_enabled" {
   type        = bool
-  default     = false
-  description = "Whether public network access is enabled for the workspace. Defaults to true."
+  default     = true
+  description = "Whether public network access is enabled for the workspace. Set to false only when managed_virtual_network_enabled is true."
 }
 
 variable "purview_id" {
