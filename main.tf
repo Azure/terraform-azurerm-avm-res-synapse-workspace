@@ -79,7 +79,7 @@ resource "azurerm_synapse_workspace_key" "example" {
 
 
 resource "azurerm_synapse_workspace_aad_admin" "admin" {
-  count = var.entra_id_admin_login != null && var.entra_id_admin_object_id != null ? 1 : 0
+  count = var.entra_id_admin_login != null && trimspace(var.entra_id_admin_object_id) != "" ? 1 : 0
 
   login                = var.entra_id_admin_login
   object_id            = var.entra_id_admin_object_id
