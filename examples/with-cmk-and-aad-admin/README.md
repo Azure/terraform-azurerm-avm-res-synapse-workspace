@@ -24,6 +24,10 @@ terraform {
       source  = "hashicorp/http"
       version = ">= 3.5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.0"
+    }
   }
 }
 
@@ -61,6 +65,14 @@ data "http" "ip" {
     max_delay_ms = 1000
     min_delay_ms = 500
   }
+}
+
+resource "random_string" "synapse_workspace_suffix" {
+  length  = 8
+  lower   = true
+  numeric = true
+  special = false
+  upper   = false
 }
 
 
@@ -135,7 +147,7 @@ module "synapse" {
   source = "../.."
 
   location                             = azurerm_resource_group.this.location
-  name                                 = "synapse-cmk-workspace-avm-01"
+  name                                 = "synapse-${random_string.synapse_workspace_suffix.result}"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
@@ -174,6 +186,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_http"></a> [http](#requirement\_http) (>= 3.5.0)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0)
+
 ## Resources
 
 The following resources are used by this module:
@@ -182,6 +196,7 @@ The following resources are used by this module:
 - [azurerm_role_assignment.adls_blob_contributor](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_storage_account.adls](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) (resource)
 - [azurerm_storage_data_lake_gen2_filesystem.adls_fs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem) (resource)
+- [random_string.synapse_workspace_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [http_http.ip](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) (data source)
 

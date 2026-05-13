@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/http"
       version = ">= 3.5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.0"
+    }
   }
 }
 
@@ -47,6 +51,14 @@ data "http" "ip" {
     max_delay_ms = 1000
     min_delay_ms = 500
   }
+}
+
+resource "random_string" "synapse_workspace_suffix" {
+  length  = 8
+  lower   = true
+  numeric = true
+  special = false
+  upper   = false
 }
 
 
@@ -121,7 +133,7 @@ module "synapse" {
   source = "../.."
 
   location                             = azurerm_resource_group.this.location
-  name                                 = "synapse-cmk-workspace-avm-01"
+  name                                 = "synapse-${random_string.synapse_workspace_suffix.result}"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id

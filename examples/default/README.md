@@ -67,6 +67,14 @@ resource "random_password" "synapse_sql_admin_password" {
   special = true
 }
 
+resource "random_string" "synapse_workspace_suffix" {
+  length  = 8
+  lower   = true
+  numeric = true
+  special = false
+  upper   = false
+}
+
 data "azurerm_client_config" "current" {}
 
 
@@ -150,7 +158,7 @@ module "synapse" {
   source = "../.."
 
   location                             = azurerm_resource_group.this.location
-  name                                 = "synapse-test-workspace-avm-01"
+  name                                 = "synapse-${random_string.synapse_workspace_suffix.result}"
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
@@ -192,6 +200,7 @@ The following resources are used by this module:
 - [azurerm_storage_data_lake_gen2_filesystem.adls_fs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_password.synapse_sql_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) (resource)
+- [random_string.synapse_workspace_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_key_vault_secret.sql_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) (data source)
 - [http_http.ip](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) (data source)
