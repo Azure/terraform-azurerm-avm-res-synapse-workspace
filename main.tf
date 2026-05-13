@@ -22,13 +22,13 @@ resource "azurerm_synapse_workspace" "this" {
     for_each = var.azure_devops_repository != null ? [var.azure_devops_repository] : []
 
     content {
-      account_name    = azure_devops_repository.value.account_name
-      branch_name     = azure_devops_repository.value.branch_name
-      project_name    = azure_devops_repository.value.project_name
-      repository_name = azure_devops_repository.value.repository_name
-      root_folder     = azure_devops_repository.value.root_folder
-      last_commit_id  = azure_devops_repository.value.last_commit_id
-      tenant_id       = azure_devops_repository.value.tenant_id
+      account_name    = azure_devops_repo.value.account_name
+      branch_name     = azure_devops_repo.value.branch_name
+      project_name    = azure_devops_repo.value.project_name
+      repository_name = azure_devops_repo.value.repository_name
+      root_folder     = azure_devops_repo.value.root_folder
+      last_commit_id  = azure_devops_repo.value.last_commit_id
+      tenant_id       = azure_devops_repo.value.tenant_id
     }
   }
   dynamic "customer_managed_key" {
@@ -44,12 +44,12 @@ resource "azurerm_synapse_workspace" "this" {
     for_each = var.github_repository != null ? [var.github_repository] : []
 
     content {
-      account_name    = github_repository.value.account_name
-      branch_name     = github_repository.value.branch_name
-      repository_name = github_repository.value.repository_name
-      root_folder     = github_repository.value.root_folder
-      git_url         = github_repository.value.git_url
-      last_commit_id  = github_repository.value.last_commit_id
+      account_name    = github_repo.value.account_name
+      branch_name     = github_repo.value.branch_name
+      repository_name = github_repo.value.repository_name
+      root_folder     = github_repo.value.root_folder
+      git_url         = github_repo.value.git_url
+      last_commit_id  = github_repo.value.last_commit_id
     }
   }
   dynamic "identity" {
