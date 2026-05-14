@@ -55,7 +55,7 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
+resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
@@ -96,7 +96,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.synapse_sql_admin_password, random_password.synapse_sql_admin_password.result)
+    test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -112,8 +112,6 @@ data "azurerm_key_vault_secret" "sql_admin" {
 
   depends_on = [module.key_vault]
 }
-
-
 
 resource "azurerm_storage_account" "adls" {
   account_replication_type      = "GRS"
@@ -132,19 +130,19 @@ resource "azurerm_storage_account" "adls" {
   depends_on = [azurerm_resource_group.this]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
-  name               = "synapseadlsfs"
-  storage_account_id = azurerm_storage_account.adls.id
-
-  depends_on = [azurerm_role_assignment.adls_blob_contributor]
-}
-
 resource "azurerm_role_assignment" "adls_blob_contributor" {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = azurerm_storage_account.adls.id
   role_definition_name = "Storage Blob Data Contributor"
 
   depends_on = [azurerm_storage_account.adls]
+}
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
+  name               = "synapseadlsfs"
+  storage_account_id = azurerm_storage_account.adls.id
+
+  depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
 module "synapse" {
@@ -155,8 +153,16 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key                 = null
-  customer_managed_key_enabled         = false
+  azure_devops_repository = {
+    account_name    = "devops-account"
+    branch_name     = "main"
+    project_name    = "synapse-project"
+    repository_name = "synapse-repo"
+    root_folder     = "/AzureSynapse"
+    last_commit_id  = "abc123def456"
+  }
+  customer_managed_key         = null
+  customer_managed_key_enabled = false
   managed_identities = {
     system_assigned = true
   }

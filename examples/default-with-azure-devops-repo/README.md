@@ -62,7 +62,7 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
+resource "random_password" "sql_admin_password" {
   length  = 16
   special = true
 }
@@ -103,7 +103,7 @@ module "key_vault" {
     }
   }
   secrets_value = {
-    test_secret = coalesce(var.synapse_sql_admin_password, random_password.synapse_sql_admin_password.result)
+    test_secret = coalesce(var.synapse_sql_admin_password, random_password.sql_admin_password.result)
   }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
@@ -119,8 +119,6 @@ data "azurerm_key_vault_secret" "sql_admin" {
 
   depends_on = [module.key_vault]
 }
-
-
 
 resource "azurerm_storage_account" "adls" {
   account_replication_type      = "GRS"
@@ -139,19 +137,19 @@ resource "azurerm_storage_account" "adls" {
   depends_on = [azurerm_resource_group.this]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
-  name               = "synapseadlsfs"
-  storage_account_id = azurerm_storage_account.adls.id
-
-  depends_on = [azurerm_role_assignment.adls_blob_contributor]
-}
-
 resource "azurerm_role_assignment" "adls_blob_contributor" {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = azurerm_storage_account.adls.id
   role_definition_name = "Storage Blob Data Contributor"
 
   depends_on = [azurerm_storage_account.adls]
+}
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
+  name               = "synapseadlsfs"
+  storage_account_id = azurerm_storage_account.adls.id
+
+  depends_on = [azurerm_role_assignment.adls_blob_contributor]
 }
 
 module "synapse" {
@@ -162,8 +160,16 @@ module "synapse" {
   resource_group_name                  = azurerm_resource_group.this.name
   sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key                 = null
-  customer_managed_key_enabled         = false
+  azure_devops_repository = {
+    account_name    = "devops-account"
+    branch_name     = "main"
+    project_name    = "synapse-project"
+    repository_name = "synapse-repo"
+    root_folder     = "/AzureSynapse"
+    last_commit_id  = "abc123def456"
+  }
+  customer_managed_key         = null
+  customer_managed_key_enabled = false
   managed_identities = {
     system_assigned = true
   }
@@ -199,7 +205,7 @@ The following resources are used by this module:
 - [azurerm_storage_account.adls](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) (resource)
 - [azurerm_storage_data_lake_gen2_filesystem.adls_fs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_data_lake_gen2_filesystem) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
-- [random_password.synapse_sql_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) (resource)
+- [random_password.sql_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) (resource)
 - [random_string.synapse_workspace_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [azurerm_key_vault_secret.sql_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) (data source)
@@ -224,7 +230,7 @@ Default: `"SQLAdmin"`
 
 ### <a name="input_synapse_sql_admin_password"></a> [synapse\_sql\_admin\_password](#input\_synapse\_sql\_admin\_password)
 
-Description: The SQL administrator password for the Synapse workspace. This is provided by the caller to avoid storing generated passwords in state.
+Description: The SQL administrator password for the Synapse workspace. Provided by the caller to avoid storing generated passwords in state.
 
 Type: `string`
 

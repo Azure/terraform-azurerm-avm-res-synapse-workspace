@@ -24,14 +24,12 @@ provider "azurerm" {
     }
   }
 }
+
+data "azurerm_client_config" "current" {}
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.0"
-}
-
-resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
-  min = 0
 }
 
 module "naming" {
@@ -55,11 +53,6 @@ data "http" "ip" {
   }
 }
 
-resource "random_password" "synapse_sql_admin_password" {
-  length  = 16
-  special = true
-}
-
 resource "random_string" "synapse_workspace_suffix" {
   length  = 8
   lower   = true
@@ -67,8 +60,6 @@ resource "random_string" "synapse_workspace_suffix" {
   special = false
   upper   = false
 }
-
-data "azurerm_client_config" "current" {}
 
 
 module "key_vault" {
@@ -79,6 +70,14 @@ module "key_vault" {
   name                = module.naming.key_vault.name_unique
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
+  keys = {
+    synapse_cmk_key = {
+      name     = "synapse-cmk-key"
+      key_type = "RSA"
+      key_size = 2048
+      key_opts = ["unwrapKey", "wrapKey"]
+    }
+  }
   network_acls = {
     bypass   = "AzureServices"
     ip_rules = ["${data.http.ip.response_body}/32"]
@@ -90,14 +89,6 @@ module "key_vault" {
       principal_id               = data.azurerm_client_config.current.object_id
     }
   }
-  secrets = {
-    test_secret = {
-      name = var.sql_administrator_login
-    }
-  }
-  secrets_value = {
-    test_secret = coalesce(var.synapse_sql_admin_password, random_password.synapse_sql_admin_password.result)
-  }
   sku_name = "standard"
   wait_for_rbac_before_secret_operations = {
     create = "60s"
@@ -105,15 +96,6 @@ module "key_vault" {
 
   depends_on = [azurerm_resource_group.this]
 }
-
-data "azurerm_key_vault_secret" "sql_admin" {
-  key_vault_id = module.key_vault.resource_id
-  name         = var.sql_administrator_login
-
-  depends_on = [module.key_vault]
-}
-
-
 
 resource "azurerm_storage_account" "adls" {
   account_replication_type      = "GRS"
@@ -132,13 +114,6 @@ resource "azurerm_storage_account" "adls" {
   depends_on = [azurerm_resource_group.this]
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
-  name               = "synapseadlsfs"
-  storage_account_id = azurerm_storage_account.adls.id
-
-  depends_on = [azurerm_role_assignment.adls_blob_contributor]
-}
-
 resource "azurerm_role_assignment" "adls_blob_contributor" {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = azurerm_storage_account.adls.id
@@ -147,16 +122,32 @@ resource "azurerm_role_assignment" "adls_blob_contributor" {
   depends_on = [azurerm_storage_account.adls]
 }
 
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_fs" {
+  name               = "synapseadlsfs"
+  storage_account_id = azurerm_storage_account.adls.id
+
+  depends_on = [azurerm_role_assignment.adls_blob_contributor]
+}
+
 module "synapse" {
   source = "../.."
 
   location                             = azurerm_resource_group.this.location
   name                                 = "synapse-${random_string.synapse_workspace_suffix.result}"
   resource_group_name                  = azurerm_resource_group.this.name
-  sql_administrator_login_password     = data.azurerm_key_vault_secret.sql_admin.value
+  sql_administrator_login_password     = null
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
-  customer_managed_key                 = null
-  customer_managed_key_enabled         = false
+  customer_managed_key = {
+    key_vault_resource_id = module.key_vault.resource_id
+    # Use a direct value because module.key_vault.keys[...] does not expose a name attribute.
+    key_name               = "synapse-cmk-key"
+    key_version            = null
+    user_assigned_identity = null
+  }
+  customer_managed_key_enabled          = true
+  entra_id_admin_object_id              = data.azurerm_client_config.current.object_id
+  entra_id_authentication_only_enabled  = true
+  key_vault_access_policy_wait_duration = var.key_vault_access_policy_wait_duration
   managed_identities = {
     system_assigned = true
   }
