@@ -64,7 +64,7 @@ resource "random_string" "synapse_workspace_suffix" {
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = "0.10.0"
+  version = "0.10.2"
 
   location            = azurerm_resource_group.this.location
   name                = module.naming.key_vault.name_unique
