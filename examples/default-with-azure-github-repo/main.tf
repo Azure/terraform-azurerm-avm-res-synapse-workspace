@@ -27,12 +27,12 @@ provider "azurerm" {
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.9.0"
+  version = "0.12.0"
 }
 
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.3.0"
+  version = "0.4.3"
 
   unique-length = 7
 }
@@ -69,7 +69,7 @@ data "azurerm_client_config" "current" {}
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = "0.10.0"
+  version = "0.10.2"
 
   location            = azurerm_resource_group.this.location
   name                = module.naming.key_vault.name_unique
