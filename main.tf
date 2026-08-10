@@ -31,6 +31,7 @@ resource "azurerm_synapse_workspace" "this" {
       tenant_id       = azure_devops_repo.value.tenant_id
     }
   }
+
   dynamic "customer_managed_key" {
     for_each = var.customer_managed_key_enabled ? [1] : []
 
@@ -40,6 +41,7 @@ resource "azurerm_synapse_workspace" "this" {
       user_assigned_identity_id = try(var.customer_managed_key.user_assigned_identity.resource_id, null)
     }
   }
+
   dynamic "github_repo" {
     for_each = var.github_repository != null ? [var.github_repository] : []
 
@@ -52,6 +54,7 @@ resource "azurerm_synapse_workspace" "this" {
       last_commit_id  = github_repo.value.last_commit_id
     }
   }
+
   dynamic "identity" {
     for_each = local.managed_identities.system_assigned_user_assigned
 
@@ -83,7 +86,6 @@ resource "azurerm_synapse_workspace_key" "example" {
     time_sleep.key_vault_access_policy
   ]
 }
-
 
 resource "azurerm_synapse_workspace_aad_admin" "admin" {
   count = var.entra_id_admin_login != null && trimspace(var.entra_id_admin_object_id) != "" ? 1 : 0
