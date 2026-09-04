@@ -31,6 +31,7 @@ provider "azurerm" {
     }
   }
 }
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.0"
@@ -55,6 +56,7 @@ resource "azurerm_resource_group" "this" {
 
 data "http" "ip" {
   url = "https://api.ipify.org/"
+
   retry {
     attempts     = 5
     max_delay_ms = 1000
@@ -76,7 +78,6 @@ resource "random_string" "synapse_workspace_suffix" {
 }
 
 data "azurerm_client_config" "current" {}
-
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
