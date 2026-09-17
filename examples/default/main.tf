@@ -28,6 +28,8 @@ provider "azurerm" {
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.0"
+
+  enable_telemetry = false
 }
 
 resource "random_integer" "region_index" {
@@ -80,6 +82,7 @@ module "key_vault" {
   name                = module.naming.key_vault.name_unique
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
+  enable_telemetry    = false
   network_acls = {
     bypass   = "AzureServices"
     ip_rules = ["${data.http.ip.response_body}/32"]
@@ -156,6 +159,7 @@ module "synapse" {
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_fs.id
   customer_managed_key                 = null
   customer_managed_key_enabled         = false
+  enable_telemetry                     = false
   managed_identities = {
     system_assigned = true
   }
