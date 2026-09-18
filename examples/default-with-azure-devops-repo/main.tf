@@ -29,7 +29,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.0"
 
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
 }
 
 resource "random_integer" "region_index" {
@@ -82,7 +82,7 @@ module "key_vault" {
   name                = module.naming.key_vault.name_unique
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  enable_telemetry    = false
+  enable_telemetry    = var.enable_telemetry
   network_acls = {
     bypass   = "AzureServices"
     ip_rules = ["${data.http.ip.response_body}/32"]
@@ -167,7 +167,7 @@ module "synapse" {
   }
   customer_managed_key         = null
   customer_managed_key_enabled = false
-  enable_telemetry             = false
+  enable_telemetry             = var.enable_telemetry
   managed_identities = {
     system_assigned = true
   }
