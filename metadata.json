@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-verified-modules-tools/main/src/Avm.Authoring/Resources/Schemas/v1/avm-module-metadata.schema.json",
+  "moduleDisplayName": "Synapse Workspace",
+  "moduleDescription": "AVM Resource Module for Synapse Workspace",
+  "canonicalType": "Microsoft.Synapse/workspaces",
+  "owners": [
+    "Karni-G"
+  ],
+  "telemetryIdPrefix": "46d3xtrf.res.23c9dfb"
+}
