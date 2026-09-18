@@ -31,7 +31,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.0"
 
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
 }
 
 module "naming" {
@@ -72,7 +72,7 @@ module "key_vault" {
   name                = module.naming.key_vault.name_unique
   resource_group_name = azurerm_resource_group.this.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  enable_telemetry    = false
+  enable_telemetry    = var.enable_telemetry
   keys = {
     synapse_cmk_key = {
       name     = "synapse-cmk-key"
@@ -148,7 +148,7 @@ module "synapse" {
     user_assigned_identity = null
   }
   customer_managed_key_enabled          = true
-  enable_telemetry                      = false
+  enable_telemetry                      = var.enable_telemetry
   entra_id_admin_object_id              = data.azurerm_client_config.current.object_id
   entra_id_authentication_only_enabled  = true
   key_vault_access_policy_wait_duration = var.key_vault_access_policy_wait_duration
