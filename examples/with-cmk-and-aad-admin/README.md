@@ -221,7 +221,7 @@ If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_key_vault_access_policy_wait_duration"></a> [key\_vault\_access\_policy\_wait\_duration](#input\_key\_vault\_access\_policy\_wait\_duration)
 
