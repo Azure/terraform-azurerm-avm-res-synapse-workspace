@@ -1,7 +1,24 @@
+variable "enable_telemetry" {
+  type        = bool
+  default     = true
+  description = <<DESCRIPTION
+This variable controls whether or not telemetry is enabled for the module.
+For more information see <https://aka.ms/avm/telemetryinfo>.
+If it is set to false, then no telemetry will be collected.
+DESCRIPTION
+}
+
 variable "key_vault_access_policy_wait_duration" {
   type        = string
   default     = "30s"
   description = "Duration to wait for Key Vault access policy propagation. Set to '0s' to disable waiting. Useful for handling eventual consistency issues with permission propagation. Change to '0s' if you do not need the delay."
+  nullable    = false
+}
+
+variable "location" {
+  type        = string
+  default     = "eastus"
+  description = "The Azure region for this module's resources or telemetry deployment."
   nullable    = false
 }
 
@@ -15,14 +32,4 @@ variable "tags" {
   type        = map(any)
   default     = {}
   description = "The map of tags to be applied to the resource"
-}
-
-variable "enable_telemetry" {
-  type        = bool
-  default     = true
-  description = <<DESCRIPTION
-This variable controls whether or not telemetry is enabled for the module.
-For more information see <https://aka.ms/avm/telemetryinfo>.
-If it is set to false, then no telemetry will be collected.
-DESCRIPTION
 }
