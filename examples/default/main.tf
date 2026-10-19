@@ -2,6 +2,10 @@ terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.12"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = ">= 4.28.0, < 5.0.0"
@@ -9,6 +13,10 @@ terraform {
     http = {
       source  = "hashicorp/http"
       version = ">= 3.5.0"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -27,8 +35,12 @@ provider "azurerm" {
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.9.0"
+  version = "0.13.0"
+  providers = {
+    azapi = azapi
+  }
 
+  location         = var.location
   enable_telemetry = var.enable_telemetry
 }
 
@@ -38,8 +50,8 @@ resource "random_integer" "region_index" {
 }
 
 module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.3.0"
+  source  = "Azure/avm-utl-naming/azure"
+  version = "0.2.0"
 
   unique-length = 7
 }
@@ -75,8 +87,9 @@ resource "random_string" "synapse_workspace_suffix" {
 data "azurerm_client_config" "current" {}
 
 module "key_vault" {
-  source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = "0.10.0"
+  source    = "Azure/avm-res-keyvault-vault/azurerm"
+  version   = "0.10.0"
+  providers = { modtm = modtm }
 
   location            = azurerm_resource_group.this.location
   name                = module.naming.key_vault.name_unique
