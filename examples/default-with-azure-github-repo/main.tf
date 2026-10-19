@@ -83,7 +83,7 @@ data "azurerm_client_config" "current" {}
 
 module "key_vault" {
   source    = "Azure/avm-res-keyvault-vault/azurerm"
-  version   = "0.10.0"
+  version   = "0.12.0"
   providers = { modtm = modtm }
 
   location            = azurerm_resource_group.this.location
