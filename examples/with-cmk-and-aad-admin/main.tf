@@ -2,6 +2,7 @@ terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
+    # tflint-ignore: terraform_unused_required_providers
     azapi = {
       source  = "Azure/azapi"
       version = "~> 2.12"
@@ -14,6 +15,7 @@ terraform {
       source  = "hashicorp/http"
       version = ">= 3.5.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -38,9 +40,6 @@ data "azurerm_client_config" "current" {}
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.13.0"
-  providers = {
-    azapi = azapi
-  }
 
   location         = var.location
   enable_telemetry = var.enable_telemetry
@@ -77,9 +76,8 @@ resource "random_string" "synapse_workspace_suffix" {
 }
 
 module "key_vault" {
-  source    = "Azure/avm-res-keyvault-vault/azurerm"
-  version   = "0.10.0"
-  providers = { modtm = modtm }
+  source  = "Azure/avm-res-keyvault-vault/azurerm"
+  version = "0.10.0"
 
   location            = azurerm_resource_group.this.location
   name                = module.naming.key_vault.name_unique
