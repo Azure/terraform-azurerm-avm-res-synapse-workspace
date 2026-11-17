@@ -84,11 +84,11 @@ module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
   version = "0.13.1"
 
-  location            = azurerm_resource_group.this.location
-  name                = module.naming.key_vault.name_unique
+  location         = azurerm_resource_group.this.location
+  name             = module.naming.key_vault.name_unique
   parent_id        = azurerm_resource_group.this.id
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  enable_telemetry    = var.enable_telemetry
+  tenant_id        = data.azurerm_client_config.current.tenant_id
+  enable_telemetry = var.enable_telemetry
   network_acls = {
     bypass   = "AzureServices"
     ip_rules = ["${data.http.ip.response_body}/32"]
