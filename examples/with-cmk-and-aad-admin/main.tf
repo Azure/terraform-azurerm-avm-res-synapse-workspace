@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.12.0, < 2.0.0"
 
   required_providers {
     # tflint-ignore: terraform_unused_required_providers
@@ -14,11 +14,6 @@ terraform {
     http = {
       source  = "hashicorp/http"
       version = ">= 3.5.0"
-    }
-    # tflint-ignore: terraform_unused_required_providers
-    modtm = {
-      source  = "registry.terraform.io/azure/modtm"
-      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -77,11 +72,11 @@ resource "random_string" "synapse_workspace_suffix" {
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = "0.12.0"
+  version = "0.13.1"
 
   location            = azurerm_resource_group.this.location
   name                = module.naming.key_vault.name_unique
-  resource_group_name = azurerm_resource_group.this.name
+  parent_id        = azurerm_resource_group.this.id
   tenant_id           = data.azurerm_client_config.current.tenant_id
   enable_telemetry    = var.enable_telemetry
   keys = {
