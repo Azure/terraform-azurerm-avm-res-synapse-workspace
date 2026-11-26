@@ -39,7 +39,7 @@ provider "azurerm" {
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.13.2"
+  version = "0.15.0"
 
   location         = var.location
   enable_telemetry = var.enable_telemetry
@@ -89,7 +89,7 @@ data "azurerm_client_config" "current" {}
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = "0.13.1"
+  version = "0.13.2"
 
   location         = azurerm_resource_group.this.location
   name             = module.naming.key_vault.name_unique
@@ -287,7 +287,7 @@ The following Modules are called:
 
 Source: Azure/avm-res-keyvault-vault/azurerm
 
-Version: 0.13.1
+Version: 0.13.2
 
 ### <a name="module_naming"></a> [naming](#module\_naming)
 
@@ -299,7 +299,7 @@ Version: 0.3.0
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.13.2
+Version: 0.15.0
 
 ### <a name="module_synapse"></a> [synapse](#module\_synapse)
 
